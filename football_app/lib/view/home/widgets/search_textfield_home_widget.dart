@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SearchTextfieldWidget extends StatefulWidget {
-  const SearchTextfieldWidget({super.key});
+class SearchTextfieldHomeWidget extends StatefulWidget {
+  const SearchTextfieldHomeWidget({super.key});
 
   @override
-  State<SearchTextfieldWidget> createState() => _SearchTextfieldWidgetState();
+  State<SearchTextfieldHomeWidget> createState() => _SearchTextfieldWidgetState();
 }
 
-class _SearchTextfieldWidgetState extends State<SearchTextfieldWidget> {
+class _SearchTextfieldWidgetState extends State<SearchTextfieldHomeWidget> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
@@ -31,7 +31,7 @@ class _SearchTextfieldWidgetState extends State<SearchTextfieldWidget> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.green, width: 1.5),
+          borderSide: BorderSide(color: Colors.white, width: 1.5),
         ),
       ),
     );

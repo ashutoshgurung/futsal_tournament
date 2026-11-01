@@ -46,7 +46,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
             enlargeCenterPage: true,
             enlargeFactor: 0.12,
             autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 4),
+            autoPlayInterval: const Duration(seconds: 3),
             autoPlayAnimationDuration: const Duration(milliseconds: 700),
             autoPlayCurve: Curves.easeInOutCubic,
             onPageChanged: (index, reason) =>

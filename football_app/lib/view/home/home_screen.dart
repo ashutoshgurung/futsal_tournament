@@ -5,7 +5,7 @@ import 'package:football_app/bloc/tournament/tournament_event.dart';
 import 'package:football_app/bloc/tournament/tournament_state.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
-import 'package:football_app/view/home/widgets/search_textfield_widget.dart';
+import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/home/widgets/tournament_list.dart';
 import 'package:football_app/view/home/widgets/tournaments_card.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     right: 20.0,
                     bottom: 12.0,
                   ),
-                  child: SearchTextfieldWidget(),
+                  child: SearchTextfieldHomeWidget(),
                 ),
                 const SizedBox(height: 15),
                 PromoCarousel(),
