@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:football_app/view/home/home_screen.dart';
-
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:football_app/repository/tournament/tournament_mock_repository.dart';
+import 'package:football_app/repository/tournament/tournament_repository.dart';
+import 'package:football_app/view/bottom_navigation/bottom_navigation_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,10 +13,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Football Tournament',
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<TournamentRepository>(
+          create: (_) => TournamentMockRepository(),
+          // Real API later (comment out the line above and use this):
+          // create: (_) => TournamentApiRepository(NetworkApiServices()),
+        ),
+        // Add more repositories here later, for example:
+        // RepositoryProvider<AuthRepository>(create: (_) => AuthApiRepository(NetworkApiServices())),
+      ],
+      child: MaterialApp(
+        title: 'Football Tournament',
+        debugShowCheckedModeBanner: false,
+        home: BottomNavigationScreen(),
+      ),
     );
   }
 }

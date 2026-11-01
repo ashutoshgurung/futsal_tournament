@@ -19,7 +19,7 @@ class NetworkApiServices implements BaseApiServices {
     } on SocketException {
       throw NoInternetException('');
     } on TimeoutException {
-      throw TimeoutException('');
+      throw RequestTimeOutException('');
     }
     return jsonResponse;
   }
@@ -36,27 +36,28 @@ class NetworkApiServices implements BaseApiServices {
     } on SocketException {
       throw NoInternetException('');
     } on TimeoutException {
-      throw TimeoutException('');
+      throw RequestTimeOutException('');
     }
     return jsonResponse;
   }
 
   dynamic returnResponse(http.Response response) {
-    switch (response) {
+    switch (response.statusCode) {
       case 200:
-        dynamic jsonResponse = jsonDecode(response.body);
-        return jsonResponse;
+      case 201:
+        return jsonDecode(response.body);
       case 400:
-        dynamic jsonResponse = jsonDecode(response.body);
-        return jsonResponse;
+        return jsonDecode(response.body);
       case 401:
         throw UnAuthorizedException();
       case 500:
         throw FetchDatastException(
-          'Error Communication with server' + response.statusCode.toString(),
+          'Error Communication with server ${response.statusCode}',
         );
       default:
-        throw RequestTimeOutException();
+        throw FetchDatastException(
+          'Unexpected status code ${response.statusCode}',
+        );
     }
   }
 }

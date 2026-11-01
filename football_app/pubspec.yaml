@@ -42,6 +42,9 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
   google_fonts: ^8.2.1
+  persistent_bottom_nav_bar_v2: ^6.5.0
+  carousel_slider: ^5.1.2
+  smooth_page_indicator: ^3.0.0
   
 
 dev_dependencies:
