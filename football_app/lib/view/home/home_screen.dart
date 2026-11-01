@@ -4,7 +4,9 @@ import 'package:football_app/bloc/tournament/tournament_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_event.dart';
 import 'package:football_app/bloc/tournament/tournament_state.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
+import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_widget.dart';
+import 'package:football_app/view/home/widgets/tournament_list.dart';
 import 'package:football_app/view/home/widgets/tournaments_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -73,80 +75,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: SearchTextfieldWidget(),
                 ),
-
                 const SizedBox(height: 15),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    child: Stack(
-                      children: [
-                        Image.asset(
-                          "assets/images/futsal1.jpg",
-                          height: 180,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                        Container(
-                          height: 180,
-                          width: double.infinity,
-                          color: Colors.black.withOpacity(0.4),
-                        ),
-
-                        Positioned(
-                          left: 16,
-                          bottom: 20,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Ready for the next match?",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-
-                              const SizedBox(height: 5),
-
-                              Text(
-                                "Discover and register for futsal tournaments.",
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white70,
-                                  fontSize: 11,
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Explore Tournaments",
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
+                PromoCarousel(),
                 const SizedBox(height: 15),
-
                 SizedBox(
                   height: 44,
                   child: ListView.separated(
@@ -226,56 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
-                BlocBuilder<TournamentBloc, TournamentState>(
-                  builder: (context, state) {
-                    // Loading
-                    if (state.status == TournamentStatusState.loading ||
-                        state.status == TournamentStatusState.initial) {
-                      return const Padding(
-                        padding: EdgeInsets.all(30),
-                        child: Center(
-                          child: CircularProgressIndicator(color: Colors.green),
-                        ),
-                      );
-                    }
-
-                    // Error
-                    if (state.status == TournamentStatusState.failure) {
-                      return Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          state.error ?? 'Something went wrong',
-                          style: GoogleFonts.poppins(color: Colors.redAccent),
-                        ),
-                      );
-                    }
-
-                    // Empty
-                    if (state.tournaments.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Text(
-                          'No tournaments available',
-                          style: GoogleFonts.poppins(color: Colors.white70),
-                        ),
-                      );
-                    }
-
-                    // Success
-                    return ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: state.tournaments.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) => TournamentCard(
-                        tournament: state.tournaments[index],
-                        onTap: () {},
-                      ),
-                    );
-                  },
-                ),
+                TournamentList(),
                 const SizedBox(height: 20),
               ],
             ),
