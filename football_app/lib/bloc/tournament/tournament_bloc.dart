@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:football_app/data/exceptions/app_exceptions.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
 
 import 'tournament_event.dart';
@@ -22,10 +24,17 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
         status: TournamentStatusState.success,
         tournaments: data,
       ));
-    } catch (e) {
+    } on AppExceptions catch (e) {
       emit(state.copyWith(
         status: TournamentStatusState.failure,
-        error: e.toString(),
+        error: e.userMessage,
+      ));
+    } catch (e) {
+      // Shows parsing bugs (e.g. a wrong field type in fromJson) in the debug console
+      debugPrint('Tournament load error: $e');
+      emit(state.copyWith(
+        status: TournamentStatusState.failure,
+        error: 'Something went wrong while loading tournaments',
       ));
     }
   }

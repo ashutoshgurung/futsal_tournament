@@ -25,7 +25,7 @@ class TournamentCard extends StatelessWidget {
               child: SizedBox(
                 width: 95,
                 height: 85,
-                child: _buildImage(tournament.imageUrl),
+                child: _buildImage(tournament.imageUrl ?? ''),
               ),
             ),
             const SizedBox(width: 12),
@@ -55,7 +55,7 @@ class TournamentCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   _InfoRow(
                     icon: Icons.location_on_outlined,
-                    text: tournament.location,
+                    text: tournament.location ?? 'TBA',
                   ),
                   const SizedBox(height: 3),
                   _InfoRow(
@@ -65,8 +65,7 @@ class TournamentCard extends StatelessWidget {
                   const SizedBox(height: 3),
                   _InfoRow(
                     icon: Icons.groups_outlined,
-                    text:
-                        '${tournament.registeredTeams}/${tournament.maxTeams} teams registered',
+                    text: tournament.teamsLabel,
                   ),
                 ],
               ),
@@ -79,13 +78,32 @@ class TournamentCard extends StatelessWidget {
   }
 
   Widget _buildImage(String path) {
+    if (path.isEmpty) return _placeholder();
+
     if (path.startsWith('http')) {
       return Image.network(
         path,
         fit: BoxFit.cover,
         errorBuilder: (_, __, ___) => _placeholder(),
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            color: Colors.white10,
+            child: const Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+          );
+        },
       );
     }
+
     return Image.asset(
       path,
       fit: BoxFit.cover,
@@ -140,10 +158,15 @@ class _StatusBadge extends StatelessWidget {
         label = 'Upcoming';
         bg = Colors.blue;
         break;
-      case TournamentStatus.registrationSoon:
-        label = 'Registration Soon';
+      case TournamentStatus.ongoing:
+        label = 'Live';
+        bg = Colors.orange;
+        break;
+      case TournamentStatus.closed:
+        label = 'Completed';
         bg = Colors.white12;
         break;
+    
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

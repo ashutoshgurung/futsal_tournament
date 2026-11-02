@@ -15,8 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TournamentModel {
 
-@JsonKey(name: '_id') String get id;// Mongo's id key
- String get name; String get location; DateTime get startDate; DateTime get endDate; int get registeredTeams; int get maxTeams;@JsonKey(name: 'image') String get imageUrl;@JsonKey(unknownEnumValue: TournamentStatus.upcoming) TournamentStatus get status;
+ String get id; String get name;@JsonKey(name: 'venue') String? get location; DateTime? get startDate; DateTime? get endDate; int get registeredTeams; int? get maxTeams; String? get imageUrl;@TournamentStatusConverter() TournamentStatus get status;
 /// Create a copy of TournamentModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -49,7 +48,7 @@ abstract mixin class $TournamentModelCopyWith<$Res>  {
   factory $TournamentModelCopyWith(TournamentModel value, $Res Function(TournamentModel) _then) = _$TournamentModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: '_id') String id, String name, String location, DateTime startDate, DateTime endDate, int registeredTeams, int maxTeams,@JsonKey(name: 'image') String imageUrl,@JsonKey(unknownEnumValue: TournamentStatus.upcoming) TournamentStatus status
+ String id, String name,@JsonKey(name: 'venue') String? location, DateTime? startDate, DateTime? endDate, int registeredTeams, int? maxTeams, String? imageUrl,@TournamentStatusConverter() TournamentStatus status
 });
 
 
@@ -66,17 +65,17 @@ class _$TournamentModelCopyWithImpl<$Res>
 
 /// Create a copy of TournamentModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? location = null,Object? startDate = null,Object? endDate = null,Object? registeredTeams = null,Object? maxTeams = null,Object? imageUrl = null,Object? status = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? location = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? registeredTeams = null,Object? maxTeams = freezed,Object? imageUrl = freezed,Object? status = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as String,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
-as DateTime,endDate: null == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
-as DateTime,registeredTeams: null == registeredTeams ? _self.registeredTeams : registeredTeams // ignore: cast_nullable_to_non_nullable
-as int,maxTeams: null == maxTeams ? _self.maxTeams : maxTeams // ignore: cast_nullable_to_non_nullable
-as int,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,registeredTeams: null == registeredTeams ? _self.registeredTeams : registeredTeams // ignore: cast_nullable_to_non_nullable
+as int,maxTeams: freezed == maxTeams ? _self.maxTeams : maxTeams // ignore: cast_nullable_to_non_nullable
+as int?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as TournamentStatus,
   ));
 }
@@ -162,7 +161,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id,  String name,  String location,  DateTime startDate,  DateTime endDate,  int registeredTeams,  int maxTeams, @JsonKey(name: 'image')  String imageUrl, @JsonKey(unknownEnumValue: TournamentStatus.upcoming)  TournamentStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'venue')  String? location,  DateTime? startDate,  DateTime? endDate,  int registeredTeams,  int? maxTeams,  String? imageUrl, @TournamentStatusConverter()  TournamentStatus status)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TournamentModel() when $default != null:
 return $default(_that.id,_that.name,_that.location,_that.startDate,_that.endDate,_that.registeredTeams,_that.maxTeams,_that.imageUrl,_that.status);case _:
@@ -183,7 +182,7 @@ return $default(_that.id,_that.name,_that.location,_that.startDate,_that.endDate
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: '_id')  String id,  String name,  String location,  DateTime startDate,  DateTime endDate,  int registeredTeams,  int maxTeams, @JsonKey(name: 'image')  String imageUrl, @JsonKey(unknownEnumValue: TournamentStatus.upcoming)  TournamentStatus status)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'venue')  String? location,  DateTime? startDate,  DateTime? endDate,  int registeredTeams,  int? maxTeams,  String? imageUrl, @TournamentStatusConverter()  TournamentStatus status)  $default,) {final _that = this;
 switch (_that) {
 case _TournamentModel():
 return $default(_that.id,_that.name,_that.location,_that.startDate,_that.endDate,_that.registeredTeams,_that.maxTeams,_that.imageUrl,_that.status);case _:
@@ -203,7 +202,7 @@ return $default(_that.id,_that.name,_that.location,_that.startDate,_that.endDate
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: '_id')  String id,  String name,  String location,  DateTime startDate,  DateTime endDate,  int registeredTeams,  int maxTeams, @JsonKey(name: 'image')  String imageUrl, @JsonKey(unknownEnumValue: TournamentStatus.upcoming)  TournamentStatus status)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'venue')  String? location,  DateTime? startDate,  DateTime? endDate,  int registeredTeams,  int? maxTeams,  String? imageUrl, @TournamentStatusConverter()  TournamentStatus status)?  $default,) {final _that = this;
 switch (_that) {
 case _TournamentModel() when $default != null:
 return $default(_that.id,_that.name,_that.location,_that.startDate,_that.endDate,_that.registeredTeams,_that.maxTeams,_that.imageUrl,_that.status);case _:
@@ -218,19 +217,18 @@ return $default(_that.id,_that.name,_that.location,_that.startDate,_that.endDate
 @JsonSerializable()
 
 class _TournamentModel extends TournamentModel {
-  const _TournamentModel({@JsonKey(name: '_id') required this.id, required this.name, required this.location, required this.startDate, required this.endDate, this.registeredTeams = 0, this.maxTeams = 0, @JsonKey(name: 'image') this.imageUrl = '', @JsonKey(unknownEnumValue: TournamentStatus.upcoming) this.status = TournamentStatus.upcoming}): super._();
+  const _TournamentModel({required this.id, required this.name, @JsonKey(name: 'venue') this.location, this.startDate, this.endDate, this.registeredTeams = 0, this.maxTeams, this.imageUrl, @TournamentStatusConverter() this.status = TournamentStatus.upcoming}): super._();
   factory _TournamentModel.fromJson(Map<String, dynamic> json) => _$TournamentModelFromJson(json);
 
-@override@JsonKey(name: '_id') final  String id;
-// Mongo's id key
+@override final  String id;
 @override final  String name;
-@override final  String location;
-@override final  DateTime startDate;
-@override final  DateTime endDate;
+@override@JsonKey(name: 'venue') final  String? location;
+@override final  DateTime? startDate;
+@override final  DateTime? endDate;
 @override@JsonKey() final  int registeredTeams;
-@override@JsonKey() final  int maxTeams;
-@override@JsonKey(name: 'image') final  String imageUrl;
-@override@JsonKey(unknownEnumValue: TournamentStatus.upcoming) final  TournamentStatus status;
+@override final  int? maxTeams;
+@override final  String? imageUrl;
+@override@JsonKey()@TournamentStatusConverter() final  TournamentStatus status;
 
 /// Create a copy of TournamentModel
 /// with the given fields replaced by the non-null parameter values.
@@ -265,7 +263,7 @@ abstract mixin class _$TournamentModelCopyWith<$Res> implements $TournamentModel
   factory _$TournamentModelCopyWith(_TournamentModel value, $Res Function(_TournamentModel) _then) = __$TournamentModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: '_id') String id, String name, String location, DateTime startDate, DateTime endDate, int registeredTeams, int maxTeams,@JsonKey(name: 'image') String imageUrl,@JsonKey(unknownEnumValue: TournamentStatus.upcoming) TournamentStatus status
+ String id, String name,@JsonKey(name: 'venue') String? location, DateTime? startDate, DateTime? endDate, int registeredTeams, int? maxTeams, String? imageUrl,@TournamentStatusConverter() TournamentStatus status
 });
 
 
@@ -282,17 +280,17 @@ class __$TournamentModelCopyWithImpl<$Res>
 
 /// Create a copy of TournamentModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? location = null,Object? startDate = null,Object? endDate = null,Object? registeredTeams = null,Object? maxTeams = null,Object? imageUrl = null,Object? status = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? location = freezed,Object? startDate = freezed,Object? endDate = freezed,Object? registeredTeams = null,Object? maxTeams = freezed,Object? imageUrl = freezed,Object? status = null,}) {
   return _then(_TournamentModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as String,startDate: null == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
-as DateTime,endDate: null == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
-as DateTime,registeredTeams: null == registeredTeams ? _self.registeredTeams : registeredTeams // ignore: cast_nullable_to_non_nullable
-as int,maxTeams: null == maxTeams ? _self.maxTeams : maxTeams // ignore: cast_nullable_to_non_nullable
-as int,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as String?,startDate: freezed == startDate ? _self.startDate : startDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,endDate: freezed == endDate ? _self.endDate : endDate // ignore: cast_nullable_to_non_nullable
+as DateTime?,registeredTeams: null == registeredTeams ? _self.registeredTeams : registeredTeams // ignore: cast_nullable_to_non_nullable
+as int,maxTeams: freezed == maxTeams ? _self.maxTeams : maxTeams // ignore: cast_nullable_to_non_nullable
+as int?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as TournamentStatus,
   ));
 }

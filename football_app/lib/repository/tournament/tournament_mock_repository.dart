@@ -5,7 +5,6 @@ class TournamentMockRepository implements TournamentRepository {
   @override
   Future<List<TournamentModel>> getUpcomingTournaments() async {
     await Future.delayed(const Duration(seconds: 1)); // fake network delay
-
     return [
       TournamentModel(
         id: '1',
@@ -38,7 +37,7 @@ class TournamentMockRepository implements TournamentRepository {
         registeredTeams: 0,
         maxTeams: 20,
         imageUrl: 'assets/images/futsal3.jpg',
-        status: TournamentStatus.registrationSoon,
+        status: TournamentStatus.upcoming,
       ),
       TournamentModel(
         id: '4',
@@ -49,7 +48,7 @@ class TournamentMockRepository implements TournamentRepository {
         registeredTeams: 0,
         maxTeams: 12,
         imageUrl: 'assets/images/futsal4.jpg',
-        status: TournamentStatus.registrationSoon,
+        status: TournamentStatus.upcoming,
       ),
     ];
   }

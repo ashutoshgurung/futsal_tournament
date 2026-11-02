@@ -4,6 +4,5 @@ part 'tournament_event.freezed.dart';
 
 @freezed
 sealed class TournamentEvent with _$TournamentEvent {
-  const factory TournamentEvent.loadUpcoming() =
-      LoadUpcomingTournaments;
+  const factory TournamentEvent.loadUpcoming() = LoadUpcomingTournaments;
 }
