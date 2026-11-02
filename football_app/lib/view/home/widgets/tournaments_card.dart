@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:football_app/model/tournament/tournament_model.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,26 +82,24 @@ class TournamentCard extends StatelessWidget {
     if (path.isEmpty) return _placeholder();
 
     if (path.startsWith('http')) {
-      return Image.network(
-        path,
+      return CachedNetworkImage(
+        imageUrl: path,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _placeholder(),
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            color: Colors.white10,
-            child: const Center(
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.green,
-                ),
+        fadeInDuration: const Duration(milliseconds: 200),
+        placeholder: (context, url) => Container(
+          color: Colors.white10,
+          child: const Center(
+            child: SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.green,
               ),
             ),
-          );
-        },
+          ),
+        ),
+        errorWidget: (context, url, error) => _placeholder(),
       );
     }
 
@@ -166,7 +165,6 @@ class _StatusBadge extends StatelessWidget {
         label = 'Completed';
         bg = Colors.white12;
         break;
-    
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
