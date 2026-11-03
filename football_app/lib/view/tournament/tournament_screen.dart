@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/tournament/widgets/search_textfield_tournament_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 

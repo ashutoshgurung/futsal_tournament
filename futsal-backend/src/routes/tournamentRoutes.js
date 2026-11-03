@@ -13,10 +13,8 @@ router.post('/', admin, validate(s.createTournament), checkTournamentLimit, c.cr
 router.get('/:id', c.get);
 router.put('/:id', admin, validate(s.updateTournament), c.update);
 router.delete('/:id', admin, c.remove);
-
 router.post('/:id/fixtures', admin, validate(s.generateFixtures), c.generateFixtures);
 router.post('/:id/advance', admin, c.advance);
 router.get('/:id/standings', c.standings);
 router.get('/:id/top-scorers', c.topScorers);
-
 module.exports = router;
