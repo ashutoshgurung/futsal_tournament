@@ -1,7 +1,7 @@
 const { prisma } = require('../config/db');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
-const { isUuid, getPagination, applyMatchFilters } = require('../utils/query');
+const { str, isUuid, getPagination, applyMatchFilters } = require('../utils/query');
 const dto = require('../utils/dto');
 const { getStandings, getTopScorers } = require('../services/statsService');
 const { listMatches, getMatchDetail } = require('../services/matchQueries');
@@ -24,6 +24,79 @@ const loadTournament = async (orgSlug, slug) => {
   return { org, t: tournament };
 };
 
+// ---------- Cross-organization listing of tournaments open for booking ----------
+const OPEN_SELECT = {
+  id: true,
+  name: true,
+  slug: true,
+  description: true,
+  format: true,
+  status: true,
+  startDate: true,
+  endDate: true,
+  venue: true,
+  imageUrl: true,
+  maxTeams: true,
+  organization: { select: { name: true, slug: true, logoUrl: true, contactEmail: true } },
+  _count: { select: { teams: true } },
+};
+
+const openConditions = () => [
+  { fixturesGenerated: false },
+  { status: { notIn: ['draft', 'completed', 'cancelled'] } },
+  { organization: { isActive: true } },
+  { OR: [{ endDate: null }, { endDate: { gte: new Date() } }] },
+];
+
+const shapeOpen = ({ _count, maxTeams, ...t }) => {
+  const teamCount = _count.teams;
+  const spotsLeft = maxTeams == null ? null : Math.max(maxTeams - teamCount, 0);
+  return { ...t, maxTeams, teamCount, spotsLeft, isFull: spotsLeft === 0 };
+};
+
+exports.listOpenTournaments = asyncHandler(async (req, res) => {
+  const and = openConditions();
+
+  const format = str(req.query.format);
+  if (format) and.push({ format });
+
+  const q = str(req.query.q);
+  if (q) and.push({ name: { contains: q, mode: 'insensitive' } });
+
+  const org = str(req.query.org);
+  if (org) and.push({ organization: { slug: org.toLowerCase() } });
+
+  const venue = str(req.query.venue);
+  if (venue) and.push({ venue: { contains: venue, mode: 'insensitive' } });
+
+  const where = { AND: and };
+  const { page, limit, skip } = getPagination(req.query);
+
+  const [rows, total] = await Promise.all([
+    prisma.tournament.findMany({
+      where,
+      select: OPEN_SELECT,
+      orderBy: [{ startDate: { sort: 'asc', nulls: 'last' } }, { createdAt: 'desc' }],
+      take: limit,
+      skip,
+    }),
+    prisma.tournament.count({ where }),
+  ]);
+
+  res.json({ success: true, data: rows.map(shapeOpen), meta: { page, limit, total } });
+});
+
+exports.openTournament = asyncHandler(async (req, res) => {
+  if (!isUuid(req.params.id)) throw new ApiError(404, 'Tournament not found');
+  const t = await prisma.tournament.findFirst({
+    where: { id: req.params.id, AND: openConditions() },
+    select: OPEN_SELECT,
+  });
+  if (!t) throw new ApiError(404, 'Tournament not found');
+  res.json({ success: true, data: shapeOpen(t) });
+});
+
+// ---------- Per-organization public endpoints ----------
 exports.organization = asyncHandler(async (req, res) => {
   const org = await loadOrg(req.params.orgSlug);
   res.json({ success: true, data: { name: org.name, slug: org.slug, logoUrl: org.logoUrl } });

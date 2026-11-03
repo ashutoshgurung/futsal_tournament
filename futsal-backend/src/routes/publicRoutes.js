@@ -1,6 +1,12 @@
 const router = require('express').Router();
 const c = require('../controllers/publicController');
 
+
+// 1. Static routes FIRST: cross-organization listing of tournaments open for booking
+router.get('/tournaments', c.listOpenTournaments);
+router.get('/tournaments/:id', c.openTournament);
+
+// 2. Param routes AFTER: per-organization public pages
 router.get('/:orgSlug', c.organization);
 router.get('/:orgSlug/tournaments', c.tournaments);
 router.get('/:orgSlug/tournaments/:slug', c.tournament);

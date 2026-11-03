@@ -63,6 +63,8 @@ model Tournament {
   organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   teams               Team[]
   matches             Match[]
+  maxTeams  Int?    @map("max_teams")
+  imageUrl  String? @map("image_url")
 
   @@unique([organizationId, slug])
   @@index([organizationId], map: "idx_tournaments_org")
