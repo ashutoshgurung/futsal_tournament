@@ -14,6 +14,7 @@ const limiter = rateLimit({
 });
 
 router.post('/register', limiter, validate(s.register), c.register);
+router.post('/google', limiter, validate(s.google), c.google);
 router.post('/login', limiter, validate(s.login), c.login);
 router.get('/me', protect, c.me);
 router.put('/password', protect, validate(s.changePassword), c.changePassword);

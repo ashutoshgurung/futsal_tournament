@@ -16,4 +16,5 @@ module.exports = {
   jwtSecret: process.env.JWT_SECRET,
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   corsOrigins: origins.includes('*') ? '*' : origins,
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
 };

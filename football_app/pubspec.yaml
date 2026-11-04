@@ -47,6 +47,7 @@ dependencies:
   smooth_page_indicator: ^3.0.0
   image_picker: ^1.2.4
   cached_network_image: ^4.0.3
+  provider: ^6.1.5+1
   
 
 dev_dependencies:

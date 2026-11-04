@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_event.dart';
-import 'package:football_app/bloc/tournament/tournament_state.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/home/widgets/tournament_list.dart';
-import 'package:football_app/view/home/widgets/tournaments_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
