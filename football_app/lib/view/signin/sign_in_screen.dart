@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:football_app/view/login/widgets/email_input_widget.dart';
-import 'package:football_app/view/login/widgets/login_button_widget.dart';
-import 'package:football_app/view/login/widgets/password_input_widget.dart';
+import 'package:football_app/view/forget_password/forget_password_screen.dart';
+import 'package:football_app/view/signin/widgets/email_input_widget.dart';
+import 'package:football_app/view/signin/widgets/login_button_widget.dart';
+import 'package:football_app/view/signin/widgets/password_input_widget.dart';
+import 'package:football_app/view/signup/signup_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -87,12 +89,22 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               child: Align(
                                 alignment: Alignment.centerRight,
-                                child: Text(
-                                  "Forgot Password?",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ForgetPasswordScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Forgot Password?",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -182,39 +194,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                 ),
                               ),
                             ),
-                            // SizedBox(height: 20),
-                            // Padding(
-                            //   padding: const EdgeInsets.symmetric(
-                            //     horizontal: 15.0,
-                            //   ),
-                            //   child: Container(
-                            //     height: 55,
-                            //     width: double.maxFinite,
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.white,
-                            //       borderRadius: BorderRadius.circular(50),
-                            //     ),
-                            //     child: Row(
-                            //       mainAxisAlignment: MainAxisAlignment.center,
-                            //       children: [
-                            //         Image.asset(
-                            //           "assets/icons/google_icon.png",
-                            //           height: 22,
-                            //           width: 22,
-                            //         ),
-                            //         const SizedBox(width: 12),
-                            //         Text(
-                            //           "Continue with Google",
-                            //           style: GoogleFonts.poppins(
-                            //             fontSize: 14,
-                            //             color: Colors.black,
-                            //             fontWeight: FontWeight.w500,
-                            //           ),
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
-                            // ),
                             SizedBox(height: 40),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -227,7 +206,14 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                                 GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => SignupScreen(),
+                                      ),
+                                    );
+                                  },
                                   child: Text(
                                     "Sign Up",
                                     style: GoogleFonts.poppins(

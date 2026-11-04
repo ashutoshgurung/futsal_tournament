@@ -4,7 +4,7 @@ import 'package:football_app/data/network/network_api_services.dart';
 import 'package:football_app/repository/tournament/tournament_api_repository.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/bottom_navigation/bottom_navigation_screen.dart';
-import 'package:football_app/view/login/sign_in_screen.dart';
+import 'package:football_app/view/signin/sign_in_screen.dart';
 import 'package:football_app/view/signup/signup_screen.dart';
 
 void main() {
