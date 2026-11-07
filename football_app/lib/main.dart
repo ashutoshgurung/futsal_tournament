@@ -10,7 +10,7 @@ import 'package:football_app/repository/auth/auth_repository_impl.dart';
 import 'package:football_app/repository/tournament/tournament_api_repository.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/signin/sign_in_screen.dart';
-import 'package:football_app/view/splash/splash_screen.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
