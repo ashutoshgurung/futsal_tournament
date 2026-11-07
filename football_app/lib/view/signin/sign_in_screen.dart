@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:football_app/view/bottom_navigation/bottom_navigation_screen.dart';
 import 'package:football_app/view/forget_password/forget_password_screen.dart';
 import 'package:football_app/view/signin/widgets/email_input_widget.dart';
 import 'package:football_app/view/signin/widgets/login_button_widget.dart';
@@ -80,7 +81,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             // Password
                             const PasswordInputWidget(),
 
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 15),
 
                             // Forgot password
                             Padding(
@@ -115,9 +116,12 @@ class _SignInScreenState extends State<SignInScreen> {
                             // Login button
                             LoginButtonWidget(
                               onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  // Dispatch your login BLoC event here.
-                                }
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BottomNavigationScreen(),
+                                  ),
+                                );
                               },
                             ),
 

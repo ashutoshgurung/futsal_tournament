@@ -42,7 +42,7 @@ class _TournamentScreenState extends State<TournamentScreen> {
           ),
           const SizedBox(height: 40),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Text(
               "All Tournaments",
               style: GoogleFonts.poppins(
@@ -53,7 +53,6 @@ class _TournamentScreenState extends State<TournamentScreen> {
             ),
           ),
           const SizedBox(height: 20),
-
         ],
       ),
     );
