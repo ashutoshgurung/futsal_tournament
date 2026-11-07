@@ -35,6 +35,7 @@ class _MyRegistrationScreenState extends State<MyRegistrationScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0D),
         elevation: 0,
+
         title: const Text(
           'My Registrations',
           style: TextStyle(
@@ -43,7 +44,7 @@ class _MyRegistrationScreenState extends State<MyRegistrationScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: Column(
         children: [

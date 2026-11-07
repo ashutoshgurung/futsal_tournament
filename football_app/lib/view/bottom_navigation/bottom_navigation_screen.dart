@@ -34,20 +34,22 @@ class BottomNavigationScreen extends StatelessWidget {
         inactiveForegroundColor: Colors.white,
       ),
     ),
-   PersistentTabConfig(
-  screen: BlocProvider(
-    create: (context) => MyRegistrationBloc(
-      context.read<MyRegistrationRepository>(),
+    PersistentTabConfig(
+      screen: RepositoryProvider(
+        create: (context) => MyRegistrationRepository(),
+        child: BlocProvider(
+          create: (context) =>
+              MyRegistrationBloc(context.read<MyRegistrationRepository>()),
+          child: const MyRegistrationScreen(),
+        ),
+      ),
+      item: ItemConfig(
+        icon: const Icon(Icons.assignment_outlined),
+        title: "My Registration",
+        activeForegroundColor: Colors.greenAccent,
+        inactiveForegroundColor: Colors.white,
+      ),
     ),
-    child: const MyRegistrationScreen(),
-  ),
-  item: ItemConfig(
-    icon: const Icon(Icons.assignment_outlined),
-    title: "My Registration",
-    activeForegroundColor: Colors.greenAccent,
-    inactiveForegroundColor: Colors.white,
-  ),
-),
     PersistentTabConfig(
       screen: ProfileScreen(),
       item: ItemConfig(
