@@ -205,7 +205,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     color: Colors.white70,
                                   ),
                                 ),
-                                GestureDetector(
+                                InkWell(
                                   onTap: () {
                                     Navigator.push(
                                       context,
