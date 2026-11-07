@@ -6,6 +6,7 @@ import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/home/widgets/tournament_list.dart';
+import 'package:football_app/view/home/widgets/tournaments_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -139,18 +140,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Spacer(),
-                      Row(
-                        children: [
-                          Text(
-                            "View All",
-                            style: GoogleFonts.poppins(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                      InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => TournamentsPage()),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              "View All",
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_right_outlined,
                               color: Colors.white,
                             ),
-                          ),
-                          Icon(Icons.arrow_right_outlined, color: Colors.white),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
