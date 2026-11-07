@@ -4,7 +4,7 @@ import 'package:football_app/model/my_registration/my_registration_model.dart';
 class RegistrationDetails extends StatelessWidget {
   final MyRegistrationModel registration;
 
-  const RegistrationDetails({
+  const RegistrationDetails({super.key, 
     required this.registration,
   });
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:football_app/view/forget_password/forget_password_instruction_screen.dart';
 import 'package:football_app/view/forget_password/widgets/f_email_input_widget.dart';
-import 'package:football_app/view/forget_password/widgets/f_password_input_widget.dart';
 import 'package:football_app/view/forget_password/widgets/f_send_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 

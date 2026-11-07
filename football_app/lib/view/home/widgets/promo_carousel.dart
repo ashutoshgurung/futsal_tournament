@@ -64,7 +64,7 @@ class _PromoCarouselState extends State<PromoCarousel> {
                     Image.asset(
                       banner['image']!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorBuilder: (_, _, _) =>
                           Container(color: const Color(0xFF1C1C1E)),
                     ),
                     // Gradient overlay for readable text
@@ -74,8 +74,8 @@ class _PromoCarouselState extends State<PromoCarousel> {
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                           colors: [
-                            Colors.black.withOpacity(0.85),
-                            Colors.black.withOpacity(0.35),
+                            Colors.black.withValues(alpha: 0.85),
+                            Colors.black.withValues(alpha: 0.35),
                           ],
                         ),
                       ),

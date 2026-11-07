@@ -5,11 +5,11 @@ class AppExceptions implements Exception {
 
   /// Text that is safe to show to the user.
   String get userMessage {
-    final m = (message ?? '').trim();
-    if (m.isEmpty) return prefix;
-    if (prefix.isEmpty) return m;
-    return '$prefix: $m';
-  }
+  final m = (message ?? '').trim();
+  if (m.isNotEmpty) return m;
+  if (prefix.isNotEmpty) return prefix;
+  return 'Something went wrong. Please try again.';
+}
 
   @override
   String toString() => userMessage;

@@ -53,7 +53,7 @@ class TournamentCardWidget extends StatelessWidget {
                     ? Image.network(
                         tournament.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Icon(
+                        errorBuilder: (_, _, _) => const Icon(
                           Icons.emoji_events,
                           color: Colors.amber,
                           size: 30,
@@ -87,7 +87,7 @@ class TournamentCardWidget extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _statusColor.withOpacity(0.15),
+                          color: _statusColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(

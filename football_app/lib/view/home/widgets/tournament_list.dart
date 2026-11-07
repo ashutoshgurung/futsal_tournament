@@ -51,7 +51,7 @@ class TournamentList extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           itemCount: state.tournaments.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) => TournamentCard(
             tournament: state.tournaments[index],
             onTap: () {},

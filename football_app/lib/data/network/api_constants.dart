@@ -1,5 +1,6 @@
 class ApiConstants {
-  // Real phone: your PC's LAN IP | Android emulator: 10.0.2.2 | iOS simulator: localhost
-  static const String baseUrl = 'http://localhost:5001';
+  static const String baseUrl = 'http://192.168.1.107:5001';
+  static const String login = '$baseUrl/api/auth/login';
+  static const String register = '$baseUrl/api/auth/register';
   static const String publicTournaments = '$baseUrl/api/public/tournaments';
 }
