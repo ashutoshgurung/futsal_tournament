@@ -55,14 +55,15 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( AppStarted value)?  appStarted,TResult Function( LoginRequested value)?  loginRequested,TResult Function( RegisterRequested value)?  registerRequested,TResult Function( LogoutRequested value)?  logoutRequested,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( AppStarted value)?  appStarted,TResult Function( LoginRequested value)?  loginRequested,TResult Function( RegisterRequested value)?  registerRequested,TResult Function( LogoutRequested value)?  logoutRequested,TResult Function( SessionExpired value)?  sessionExpired,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
 return appStarted(_that);case LoginRequested() when loginRequested != null:
 return loginRequested(_that);case RegisterRequested() when registerRequested != null:
 return registerRequested(_that);case LogoutRequested() when logoutRequested != null:
-return logoutRequested(_that);case _:
+return logoutRequested(_that);case SessionExpired() when sessionExpired != null:
+return sessionExpired(_that);case _:
   return orElse();
 
 }
@@ -80,14 +81,15 @@ return logoutRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( AppStarted value)  appStarted,required TResult Function( LoginRequested value)  loginRequested,required TResult Function( RegisterRequested value)  registerRequested,required TResult Function( LogoutRequested value)  logoutRequested,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( AppStarted value)  appStarted,required TResult Function( LoginRequested value)  loginRequested,required TResult Function( RegisterRequested value)  registerRequested,required TResult Function( LogoutRequested value)  logoutRequested,required TResult Function( SessionExpired value)  sessionExpired,}){
 final _that = this;
 switch (_that) {
 case AppStarted():
 return appStarted(_that);case LoginRequested():
 return loginRequested(_that);case RegisterRequested():
 return registerRequested(_that);case LogoutRequested():
-return logoutRequested(_that);}
+return logoutRequested(_that);case SessionExpired():
+return sessionExpired(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -101,14 +103,15 @@ return logoutRequested(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( AppStarted value)?  appStarted,TResult? Function( LoginRequested value)?  loginRequested,TResult? Function( RegisterRequested value)?  registerRequested,TResult? Function( LogoutRequested value)?  logoutRequested,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( AppStarted value)?  appStarted,TResult? Function( LoginRequested value)?  loginRequested,TResult? Function( RegisterRequested value)?  registerRequested,TResult? Function( LogoutRequested value)?  logoutRequested,TResult? Function( SessionExpired value)?  sessionExpired,}){
 final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
 return appStarted(_that);case LoginRequested() when loginRequested != null:
 return loginRequested(_that);case RegisterRequested() when registerRequested != null:
 return registerRequested(_that);case LogoutRequested() when logoutRequested != null:
-return logoutRequested(_that);case _:
+return logoutRequested(_that);case SessionExpired() when sessionExpired != null:
+return sessionExpired(_that);case _:
   return null;
 
 }
@@ -125,13 +128,14 @@ return logoutRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  appStarted,TResult Function( String email,  String password)?  loginRequested,TResult Function( String organizationName,  String name,  String email,  String password)?  registerRequested,TResult Function()?  logoutRequested,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  appStarted,TResult Function( String email,  String password)?  loginRequested,TResult Function( String organizationName,  String name,  String email,  String password)?  registerRequested,TResult Function()?  logoutRequested,TResult Function()?  sessionExpired,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
 return appStarted();case LoginRequested() when loginRequested != null:
 return loginRequested(_that.email,_that.password);case RegisterRequested() when registerRequested != null:
 return registerRequested(_that.organizationName,_that.name,_that.email,_that.password);case LogoutRequested() when logoutRequested != null:
-return logoutRequested();case _:
+return logoutRequested();case SessionExpired() when sessionExpired != null:
+return sessionExpired();case _:
   return orElse();
 
 }
@@ -149,13 +153,14 @@ return logoutRequested();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  appStarted,required TResult Function( String email,  String password)  loginRequested,required TResult Function( String organizationName,  String name,  String email,  String password)  registerRequested,required TResult Function()  logoutRequested,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  appStarted,required TResult Function( String email,  String password)  loginRequested,required TResult Function( String organizationName,  String name,  String email,  String password)  registerRequested,required TResult Function()  logoutRequested,required TResult Function()  sessionExpired,}) {final _that = this;
 switch (_that) {
 case AppStarted():
 return appStarted();case LoginRequested():
 return loginRequested(_that.email,_that.password);case RegisterRequested():
 return registerRequested(_that.organizationName,_that.name,_that.email,_that.password);case LogoutRequested():
-return logoutRequested();}
+return logoutRequested();case SessionExpired():
+return sessionExpired();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -169,13 +174,14 @@ return logoutRequested();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  appStarted,TResult? Function( String email,  String password)?  loginRequested,TResult? Function( String organizationName,  String name,  String email,  String password)?  registerRequested,TResult? Function()?  logoutRequested,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  appStarted,TResult? Function( String email,  String password)?  loginRequested,TResult? Function( String organizationName,  String name,  String email,  String password)?  registerRequested,TResult? Function()?  logoutRequested,TResult? Function()?  sessionExpired,}) {final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
 return appStarted();case LoginRequested() when loginRequested != null:
 return loginRequested(_that.email,_that.password);case RegisterRequested() when registerRequested != null:
 return registerRequested(_that.organizationName,_that.name,_that.email,_that.password);case LogoutRequested() when logoutRequested != null:
-return logoutRequested();case _:
+return logoutRequested();case SessionExpired() when sessionExpired != null:
+return sessionExpired();case _:
   return null;
 
 }
@@ -379,6 +385,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'AuthEvent.logoutRequested()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class SessionExpired implements AuthEvent {
+  const SessionExpired();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionExpired);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.sessionExpired()';
 }
 
 

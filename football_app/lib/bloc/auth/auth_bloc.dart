@@ -13,18 +13,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginRequested>(_onLogin);
     on<RegisterRequested>(_onRegister);
     on<LogoutRequested>(_onLogout);
+    on<SessionExpired>(_onSessionExpired);
   }
 
+  /// Fast local check first (splash goes away immediately), then the server
+  /// verifies the token in the background.
   Future<void> _onAppStarted(AppStarted event, Emitter<AuthState> emit) async {
+    bool valid;
     try {
-      final token = await _repo.getSavedToken();
-      emit(state.copyWith(
-        status: (token != null && token.isNotEmpty)
-            ? AuthStatus.success
-            : AuthStatus.unauthenticated,
-      ));
+      valid = await _repo.hasValidSession();
     } catch (_) {
-      emit(state.copyWith(status: AuthStatus.unauthenticated));
+      valid = false;
+    }
+
+    emit(state.copyWith(
+      status: valid ? AuthStatus.success : AuthStatus.unauthenticated,
+    ));
+
+    if (!valid) return;
+
+    // Home screen is already visible; verify with the server quietly.
+    try {
+      await _repo.verifySessionInBackground();
+    } on UnAuthorizedException {
+      add(const AuthEvent.sessionExpired());
+    } catch (_) {
+      // offline, timeout, 5xx: keep the user logged in
     }
   }
 
@@ -46,6 +60,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
     await _repo.logout();
+    emit(const AuthState(status: AuthStatus.unauthenticated));
+  }
+
+  /// Fired by NetworkApiServices when the server rejects the token (401).
+  Future<void> _onSessionExpired(
+    SessionExpired event,
+    Emitter<AuthState> emit,
+  ) async {
     emit(const AuthState(status: AuthStatus.unauthenticated));
   }
 

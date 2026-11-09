@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_event.dart';
 import 'package:football_app/bloc/tournament/tournament_state.dart';
-import 'package:football_app/data/network/network_api_services.dart';
-import 'package:football_app/repository/tournament/tournament_api_repository.dart';
+import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/home/widgets/tournaments_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -14,9 +13,9 @@ class TournamentsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          TournamentBloc(TournamentApiRepository(NetworkApiServices()))
-            ..add(const TournamentEvent.loadUpcoming()),
+      create: (context) =>
+          TournamentBloc(context.read<TournamentRepository>())
+            ..add(TournamentEvent.loadUpcoming()),
       child: const _TournamentsView(),
     );
   }
