@@ -84,7 +84,7 @@ class TournamentCard extends StatelessWidget {
       return Image.network(
         path,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _placeholder(),
+        errorBuilder: (_, _, _) => _placeholder(),
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
           return Container(
@@ -107,7 +107,7 @@ class TournamentCard extends StatelessWidget {
     return Image.asset(
       path,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => _placeholder(),
+      errorBuilder: (_, _, _) => _placeholder(),
     );
   }
 

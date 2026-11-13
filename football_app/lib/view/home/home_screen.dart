@@ -6,11 +6,13 @@ import 'package:football_app/repository/tournament/tournament_repository.dart';
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/home/widgets/tournament_list.dart';
-import 'package:football_app/view/home/widgets/tournaments_card.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback onViewAllTournaments;
+
+  const HomeScreen({super.key, required this.onViewAllTournaments});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -83,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     itemCount: categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    separatorBuilder: (_, _) => const SizedBox(width: 10),
                     itemBuilder: (context, index) {
                       final isSelected = index == 0; // first one active for now
                       return Container(
@@ -141,10 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Spacer(),
                       InkWell(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => TournamentsPage()),
-                        ),
+                        onTap: widget.onViewAllTournaments,
                         child: Row(
                           children: [
                             Text(

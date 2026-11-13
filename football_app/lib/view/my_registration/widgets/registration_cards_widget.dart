@@ -7,7 +7,7 @@ class RegistrationCard extends StatelessWidget {
   final MyRegistrationModel registration;
   final VoidCallback onTap;
 
-  const RegistrationCard({
+  const RegistrationCard({super.key, 
     required this.registration,
     required this.onTap,
   });

@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
 part 'my_registration_model.freezed.dart';
 part 'my_registration_model.g.dart';
 

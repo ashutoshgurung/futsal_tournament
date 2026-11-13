@@ -4,7 +4,7 @@ class StatusChip extends StatelessWidget {
   final String label;
   final bool isPayment;
 
-  const StatusChip({
+  const StatusChip({super.key, 
     required this.label,
     required this.isPayment,
   });

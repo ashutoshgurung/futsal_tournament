@@ -47,13 +47,16 @@ dependencies:
   smooth_page_indicator: ^3.0.0
   image_picker: ^1.2.4
   cached_network_image: ^4.0.3
-  provider: ^6.1.5+1
-  
+  provider: ^6.1.5+1  
+  flutter_secure_storage: ^11.2.0
+  jwt_decoder: ^2.0.1
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.15.1
+  flutter_native_splash: ^2.4.8
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -62,6 +65,20 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   json_serializable: ^6.15.2
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/futbookok.png
+  color_dark: "#FFFFFF"
+  image_dark: assets/images/futbookok.png
+
+  android_12:
+    color: "#FFFFFF"
+    image: assets/images/futbookok.png
+    icon_background_color: "#FFFFFF"
+    color_dark: "#FFFFFF"
+    image_dark: assets/images/futbookok.png
+    icon_background_color_dark: "#FFFFFF"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

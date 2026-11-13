@@ -35,6 +35,7 @@ class _MyRegistrationScreenState extends State<MyRegistrationScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0B0B0D),
         elevation: 0,
+
         title: const Text(
           'My Registrations',
           style: TextStyle(
@@ -43,7 +44,7 @@ class _MyRegistrationScreenState extends State<MyRegistrationScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: Column(
         children: [
@@ -145,7 +146,7 @@ class _MyRegistrationScreenState extends State<MyRegistrationScreen> {
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         itemCount: filteredRegistrations.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 14),
+        separatorBuilder: (_, _) => const SizedBox(height: 14),
         itemBuilder: (context, index) {
           final registration = filteredRegistrations[index];
 
