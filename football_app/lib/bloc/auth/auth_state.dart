@@ -54,3 +54,4 @@ class AuthState {
   String toString() =>
       'AuthState(status: $status, message: $message, organizationRequired: $organizationRequired)';
 }
+

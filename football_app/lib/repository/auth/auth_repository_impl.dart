@@ -1,3 +1,7 @@
+
+import 'dart:async';
+
+
 import 'package:football_app/data/exceptions/app_exceptions.dart';
 import 'package:football_app/data/network/api_constants.dart';
 import 'package:football_app/data/network/base_api_services.dart';
@@ -7,7 +11,7 @@ import 'package:football_app/model/auth_response/auth_response_model.dart';
 import 'package:football_app/repository/auth/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class AuthRepositoryImpl implements AuthRepository {
+abstract class AuthRepositoryImpl implements AuthRepository {
   final BaseApiServices _api;
   final TokenStorage _storage;
   AuthRepositoryImpl(this._api, this._storage);
@@ -16,8 +20,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> _ensureGoogle() => _googleInit ??=
       GoogleSignIn.instance.initialize(serverClientId: ApiConstants.googleServerClientId);
 
-  /// Saves the token and maps the backend JSON ({token,user,organization}) with
-  /// AuthResponseModel.fromJson (assumed to exist - it is a freezed json model).
+
   Future<AuthResponseModel> _persist(dynamic res) async {
     final map = res as Map<String, dynamic>;
     // NOTE: assumes TokenStorage has saveToken(String). Rename if yours differs.
@@ -29,6 +32,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<({bool loggedIn, AuthResponseModel? session})> restoreSession() async {
     final token = await _storage.readToken();
     if (token == null || token.isEmpty) return (loggedIn: false, session: null);
+
     try {
       // Explicit token => network layer will NOT fire the global 401 redirect.
       final res = await _api.getApi(ApiConstants.me, token: token) as Map<String, dynamic>;

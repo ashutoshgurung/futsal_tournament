@@ -27,9 +27,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
   bool _obscure = true;
 
   OutlineInputBorder _border(Color color) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(50),
-        borderSide: BorderSide(color: color),
-      );
+    borderRadius: BorderRadius.circular(50),
+    borderSide: BorderSide(color: color),
+  );
 
   @override
   Widget build(BuildContext context) {

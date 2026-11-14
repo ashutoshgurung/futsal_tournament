@@ -34,7 +34,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final r = await _repo.restoreSession();
       emit(r.loggedIn ? _ok(r.session) : _loggedOut);
     } catch (_) {
+
       emit(_loggedOut);
+
     }
   }
 

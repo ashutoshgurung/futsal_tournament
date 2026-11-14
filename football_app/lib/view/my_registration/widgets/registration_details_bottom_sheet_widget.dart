@@ -4,9 +4,7 @@ import 'package:football_app/model/my_registration/my_registration_model.dart';
 class RegistrationDetails extends StatelessWidget {
   final MyRegistrationModel registration;
 
-  const RegistrationDetails({super.key, 
-    required this.registration,
-  });
+  const RegistrationDetails({super.key, required this.registration});
 
   @override
   Widget build(BuildContext context) {
@@ -39,10 +37,7 @@ class RegistrationDetails extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 registration.teamName,
-                style: const TextStyle(
-                  color: Color(0xFFB6F36B),
-                  fontSize: 15,
-                ),
+                style: const TextStyle(color: Color(0xFFB6F36B), fontSize: 15),
               ),
               const SizedBox(height: 22),
               _detailRow('Location', registration.location),
@@ -54,8 +49,14 @@ class RegistrationDetails extends StatelessWidget {
                 'Registered on',
                 formatDate(registration.registeredAt),
               ),
-              _detailRow('Registration fee', 'Rs. ${registration.registrationFee}'),
-              _detailRow('Registration status', registration.registrationStatus),
+              _detailRow(
+                'Registration fee',
+                'Rs. ${registration.registrationFee}',
+              ),
+              _detailRow(
+                'Registration status',
+                registration.registrationStatus,
+              ),
               _detailRow('Payment status', registration.paymentStatus),
               const SizedBox(height: 20),
               const Text(
@@ -86,8 +87,9 @@ class RegistrationDetails extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 14,
-                        backgroundColor: const Color(0xFFB6F36B)
-                            .withValues(alpha: 0.15),
+                        backgroundColor: const Color(
+                          0xFFB6F36B,
+                        ).withValues(alpha: 0.15),
                         child: Text(
                           '${entry.key + 1}',
                           style: const TextStyle(
@@ -124,10 +126,7 @@ class RegistrationDetails extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 13,
-              ),
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
             ),
           ),
           const SizedBox(width: 12),
@@ -150,8 +149,18 @@ class RegistrationDetails extends StatelessWidget {
 
 String formatDate(DateTime date) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   return '${date.day} ${months[date.month - 1]} ${date.year}';

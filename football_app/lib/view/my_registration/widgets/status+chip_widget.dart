@@ -4,10 +4,7 @@ class StatusChip extends StatelessWidget {
   final String label;
   final bool isPayment;
 
-  const StatusChip({super.key, 
-    required this.label,
-    required this.isPayment,
-  });
+  const StatusChip({super.key, required this.label, required this.isPayment});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +23,7 @@ class StatusChip extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),

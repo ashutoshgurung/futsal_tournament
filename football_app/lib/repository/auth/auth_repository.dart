@@ -24,4 +24,9 @@ abstract class AuthRepository {
   Future<void> changePassword(String currentPassword, String newPassword);
 
   Future<void> logout();
+
+  Future<void> verifySessionInBackground();
+  Future<String?> getSavedToken();
+  Future<bool> hasValidSession();
 }
+

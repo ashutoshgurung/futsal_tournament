@@ -138,11 +138,13 @@ class NetworkApiServices implements BaseApiServices {
     return headers;
   }
 
+
   /// Endpoints that must NOT send a token (a wrong password / bad Google token also returns 401).
   bool _isPublic(String url) =>
       url == ApiConstants.login ||
       url == ApiConstants.register ||
       url == ApiConstants.google || // CHANGED
+
       url.startsWith(ApiConstants.publicTournaments);
 
   @override

@@ -113,7 +113,20 @@ abstract class TournamentModel with _$TournamentModel {
       _$TournamentModelFromJson(json);
 
   String get dateRange {
-    const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const m = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final s = startDate?.toLocal(), e = endDate?.toLocal();
     if (s == null) return 'Date TBA';
     if (e == null) return '${m[s.month - 1]} ${s.day}, ${s.year}';

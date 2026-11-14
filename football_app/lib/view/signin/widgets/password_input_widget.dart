@@ -40,7 +40,9 @@ class _PasswordInputWidgetState extends State<PasswordInputWidget> {
           prefixIcon: const Icon(Icons.lock_outline, color: Colors.white70),
           suffixIcon: IconButton(
             icon: Icon(
-              _obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+              _obscure
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
               color: Colors.white70,
             ),
             onPressed: () => setState(() => _obscure = !_obscure),
@@ -67,7 +69,10 @@ class _PasswordInputWidgetState extends State<PasswordInputWidget> {
             borderRadius: BorderRadius.circular(50),
             borderSide: const BorderSide(color: Colors.redAccent),
           ),
-          errorStyle: GoogleFonts.poppins(color: Colors.redAccent, fontSize: 11),
+          errorStyle: GoogleFonts.poppins(
+            color: Colors.redAccent,
+            fontSize: 11,
+          ),
         ),
       ),
     );

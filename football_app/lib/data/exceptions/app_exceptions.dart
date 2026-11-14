@@ -5,11 +5,11 @@ class AppExceptions implements Exception {
 
   /// Text that is safe to show to the user.
   String get userMessage {
-  final m = (message ?? '').trim();
-  if (m.isNotEmpty) return m;
-  if (prefix.isNotEmpty) return prefix;
-  return 'Something went wrong. Please try again.';
-}
+    final m = (message ?? '').trim();
+    if (m.isNotEmpty) return m;
+    if (prefix.isNotEmpty) return prefix;
+    return 'Something went wrong. Please try again.';
+  }
 
   @override
   String toString() => userMessage;
@@ -17,12 +17,12 @@ class AppExceptions implements Exception {
 
 class NoInternetException extends AppExceptions {
   NoInternetException([String? message])
-      : super(message, 'No internet connection');
+    : super(message, 'No internet connection');
 }
 
 class RequestTimeOutException extends AppExceptions {
   RequestTimeOutException([String? message])
-      : super(message, 'Request timed out');
+    : super(message, 'Request timed out');
 }
 
 class BadRequestException extends AppExceptions {
@@ -31,12 +31,12 @@ class BadRequestException extends AppExceptions {
 
 class UnAuthorizedException extends AppExceptions {
   UnAuthorizedException([String? message])
-      : super(message, 'Please log in to continue');
+    : super(message, 'Please log in to continue');
 }
 
 class ForbiddenException extends AppExceptions {
   ForbiddenException([String? message])
-      : super(message, "You don't have access to this");
+    : super(message, "You don't have access to this");
 }
 
 class NotFoundException extends AppExceptions {
@@ -53,5 +53,5 @@ class FetchDatastException extends AppExceptions {
 
 class InvalidResponseException extends AppExceptions {
   InvalidResponseException([String? message])
-      : super(message, 'Invalid response from server');
+    : super(message, 'Invalid response from server');
 }

@@ -166,7 +166,6 @@ class _StatusBadge extends StatelessWidget {
         label = 'Completed';
         bg = Colors.white12;
         break;
-    
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

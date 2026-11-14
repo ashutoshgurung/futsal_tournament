@@ -7,7 +7,8 @@ class RegistrationCard extends StatelessWidget {
   final MyRegistrationModel registration;
   final VoidCallback onTap;
 
-  const RegistrationCard({super.key, 
+  const RegistrationCard({
+    super.key,
     required this.registration,
     required this.onTap,
   });
@@ -59,19 +60,13 @@ class RegistrationCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     registration.teamName,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 9),
-            _infoRow(
-              Icons.location_on_outlined,
-              registration.location,
-            ),
+            _infoRow(Icons.location_on_outlined, registration.location),
             const SizedBox(height: 9),
             _infoRow(
               Icons.calendar_month_outlined,
@@ -88,10 +83,7 @@ class RegistrationCard extends StatelessWidget {
                   isPayment: false,
                 ),
                 const SizedBox(width: 8),
-                StatusChip(
-                  label: registration.paymentStatus,
-                  isPayment: true,
-                ),
+                StatusChip(label: registration.paymentStatus, isPayment: true),
                 const Spacer(),
                 Text(
                   'Rs. ${registration.registrationFee}',
@@ -117,10 +109,7 @@ class RegistrationCard extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: Colors.white60,
-              fontSize: 13,
-            ),
+            style: const TextStyle(color: Colors.white60, fontSize: 13),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

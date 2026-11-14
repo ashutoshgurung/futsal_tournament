@@ -26,6 +26,7 @@ sealed class AuthEvent {
   const factory AuthEvent.sessionExpired() = SessionExpired;
 }
 
+
 final class AppStarted extends AuthEvent {
   const AppStarted();
 }
@@ -65,3 +66,4 @@ final class LogoutRequested extends AuthEvent {
 final class SessionExpired extends AuthEvent {
   const SessionExpired();
 }
+
