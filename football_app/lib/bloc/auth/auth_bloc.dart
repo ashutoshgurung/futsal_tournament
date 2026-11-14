@@ -26,9 +26,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       valid = false;
     }
 
-    emit(state.copyWith(
-      status: valid ? AuthStatus.success : AuthStatus.unauthenticated,
-    ));
+    emit(
+      state.copyWith(
+        status: valid ? AuthStatus.success : AuthStatus.unauthenticated,
+      ),
+    );
 
     if (!valid) return;
 
@@ -79,24 +81,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final res = await call();
       if (res.token.isEmpty) {
-        emit(state.copyWith(
-          status: AuthStatus.failure,
-          message: 'Something went wrong',
-        ));
+        emit(
+          state.copyWith(
+            status: AuthStatus.failure,
+            message: 'Something went wrong',
+          ),
+        );
         return;
       }
-      emit(state.copyWith(
-        status: AuthStatus.success,
-        session: res,
-        message: null,
-      ));
+      emit(
+        state.copyWith(status: AuthStatus.success, session: res, message: null),
+      );
     } on AppExceptions catch (e) {
       emit(state.copyWith(status: AuthStatus.failure, message: e.userMessage));
     } catch (_) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        message: 'Something went wrong. Please try again.',
-      ));
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: 'Something went wrong. Please try again.',
+        ),
+      );
     }
   }
 }

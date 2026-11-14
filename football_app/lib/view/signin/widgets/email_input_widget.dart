@@ -62,7 +62,10 @@ class _EmailInputWidgetState extends State<EmailInputWidget> {
             borderRadius: BorderRadius.circular(50),
             borderSide: const BorderSide(color: Colors.redAccent),
           ),
-          errorStyle: GoogleFonts.poppins(color: Colors.redAccent, fontSize: 11),
+          errorStyle: GoogleFonts.poppins(
+            color: Colors.redAccent,
+            fontSize: 11,
+          ),
         ),
       ),
     );

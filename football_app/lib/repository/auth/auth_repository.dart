@@ -1,6 +1,5 @@
 import 'package:football_app/model/auth_response/auth_response_model.dart';
 
-
 abstract class AuthRepository {
   Future<AuthResponseModel> login(String email, String password);
 
@@ -12,7 +11,7 @@ abstract class AuthRepository {
   });
 
   Future<void> logout();
-  Future<void>verifySessionInBackground();
+  Future<void> verifySessionInBackground();
   Future<String?> getSavedToken();
   Future<bool> hasValidSession();
 }

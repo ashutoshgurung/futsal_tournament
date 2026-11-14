@@ -1,6 +1,4 @@
-
 import 'dart:async';
-
 
 import 'package:football_app/data/exceptions/app_exceptions.dart';
 import 'package:football_app/data/network/api_constants.dart';
@@ -17,33 +15,33 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl(this._api, this._tokenStorage);
 
- @override
-Future<bool> hasValidSession() async {
-  final token = await _tokenStorage.readToken();
+  @override
+  Future<bool> hasValidSession() async {
+    final token = await _tokenStorage.readToken();
 
-  if (token == null || token.isEmpty || _isExpired(token)) {
-    await _tokenStorage.deleteToken();
-    return false;
+    if (token == null || token.isEmpty || _isExpired(token)) {
+      await _tokenStorage.deleteToken();
+      return false;
+    }
+    return true;
   }
-  return true;
-}
 
-@override
-Future<void> verifySessionInBackground() async {
-  final token = await _tokenStorage.readToken();
-  if (token == null) return;
+  @override
+  Future<void> verifySessionInBackground() async {
+    final token = await _tokenStorage.readToken();
+    if (token == null) return;
 
-  try {
-    await _api
-        .getApi(ApiConstants.me, token: token)
-        .timeout(const Duration(seconds: 5));
-  } on UnAuthorizedException {
-    await _tokenStorage.deleteToken();
-    rethrow; // the bloc turns this into sessionExpired
-  } catch (_) {
-    // offline, timeout, 5xx: don't log the user out
+    try {
+      await _api
+          .getApi(ApiConstants.me, token: token)
+          .timeout(const Duration(seconds: 5));
+    } on UnAuthorizedException {
+      await _tokenStorage.deleteToken();
+      rethrow; // the bloc turns this into sessionExpired
+    } catch (_) {
+      // offline, timeout, 5xx: don't log the user out
+    }
   }
-}
 
   bool _isExpired(String token) {
     try {

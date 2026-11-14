@@ -6,7 +6,7 @@ part 'auth_response_model.freezed.dart';
 part 'auth_response_model.g.dart';
 
 @freezed
-abstract class AuthResponseModel with _$AuthResponseModel{
+abstract class AuthResponseModel with _$AuthResponseModel {
   factory AuthResponseModel({
     @Default('') String token,
     UserModel? user,

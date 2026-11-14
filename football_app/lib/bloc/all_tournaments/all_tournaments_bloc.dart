@@ -15,19 +15,22 @@ class AllTournamentsBloc
     LoadAllTournaments event,
     Emitter<AllTournamentsState> emit,
   ) async {
-    emit(state.copyWith(status: AllTournamentsStatus.loading, errorMessage: null));
+    emit(
+      state.copyWith(status: AllTournamentsStatus.loading, errorMessage: null),
+    );
     try {
       // Switch to repository.getAllTournaments() if your backend has a separate route
       final list = await repository.getUpcomingTournaments();
-      emit(state.copyWith(
-        status: AllTournamentsStatus.success,
-        tournaments: list,
-      ));
+      emit(
+        state.copyWith(status: AllTournamentsStatus.success, tournaments: list),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: AllTournamentsStatus.failure,
-        errorMessage: 'Failed to load tournaments',
-      ));
+      emit(
+        state.copyWith(
+          status: AllTournamentsStatus.failure,
+          errorMessage: 'Failed to load tournaments',
+        ),
+      );
     }
   }
 }

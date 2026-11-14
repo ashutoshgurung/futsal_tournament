@@ -20,22 +20,28 @@ class TournamentBloc extends Bloc<TournamentEvent, TournamentState> {
     emit(state.copyWith(status: TournamentStatusState.loading, error: null));
     try {
       final data = await repository.getUpcomingTournaments();
-      emit(state.copyWith(
-        status: TournamentStatusState.success,
-        tournaments: data,
-      ));
+      emit(
+        state.copyWith(
+          status: TournamentStatusState.success,
+          tournaments: data,
+        ),
+      );
     } on AppExceptions catch (e) {
-      emit(state.copyWith(
-        status: TournamentStatusState.failure,
-        error: e.userMessage,
-      ));
+      emit(
+        state.copyWith(
+          status: TournamentStatusState.failure,
+          error: e.userMessage,
+        ),
+      );
     } catch (e) {
       // Shows parsing bugs (e.g. a wrong field type in fromJson) in the debug console
       debugPrint('Tournament load error: $e');
-      emit(state.copyWith(
-        status: TournamentStatusState.failure,
-        error: 'Something went wrong while loading tournaments',
-      ));
+      emit(
+        state.copyWith(
+          status: TournamentStatusState.failure,
+          error: 'Something went wrong while loading tournaments',
+        ),
+      );
     }
   }
 }

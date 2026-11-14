@@ -5,7 +5,8 @@ class SearchTextfieldHomeWidget extends StatefulWidget {
   const SearchTextfieldHomeWidget({super.key});
 
   @override
-  State<SearchTextfieldHomeWidget> createState() => _SearchTextfieldWidgetState();
+  State<SearchTextfieldHomeWidget> createState() =>
+      _SearchTextfieldWidgetState();
 }
 
 class _SearchTextfieldWidgetState extends State<SearchTextfieldHomeWidget> {

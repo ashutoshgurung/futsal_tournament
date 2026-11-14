@@ -136,10 +136,10 @@ class NetworkApiServices implements BaseApiServices {
     return headers;
   }
 
-  /// Endpoints that must NOT send a token (a wrong password also returns 401).
   bool _isPublic(String url) =>
       url == ApiConstants.login ||
       url == ApiConstants.register ||
+      url == ApiConstants.organizerRegister ||
       url.startsWith(ApiConstants.publicTournaments);
 
   @override

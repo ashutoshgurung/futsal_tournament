@@ -6,11 +6,7 @@ class TournamentCardWidget extends StatelessWidget {
   final TournamentModel tournament;
   final VoidCallback? onTap;
 
-  const TournamentCardWidget({
-    super.key,
-    required this.tournament,
-    this.onTap,
-  });
+  const TournamentCardWidget({super.key, required this.tournament, this.onTap});
 
   Color get _statusColor {
     switch (tournament.status) {
@@ -59,8 +55,11 @@ class TournamentCardWidget extends StatelessWidget {
                           size: 30,
                         ),
                       )
-                    : const Icon(Icons.emoji_events,
-                        color: Colors.amber, size: 30),
+                    : const Icon(
+                        Icons.emoji_events,
+                        color: Colors.amber,
+                        size: 30,
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -85,7 +84,9 @@ class TournamentCardWidget extends StatelessWidget {
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: _statusColor.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
@@ -105,8 +106,11 @@ class TournamentCardWidget extends StatelessWidget {
                   if (tournament.location != null)
                     Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -114,7 +118,9 @@ class TournamentCardWidget extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.poppins(
-                                fontSize: 12, color: Colors.grey),
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
                       ],
@@ -122,14 +128,18 @@ class TournamentCardWidget extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     tournament.dateRange,
-                    style:
-                        GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     tournament.teamsLabel,
-                    style:
-                        GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),

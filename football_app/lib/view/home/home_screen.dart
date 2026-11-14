@@ -3,9 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_event.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
+import 'package:football_app/view/becomeorganizer/become_organizer_screen.dart';
+import 'package:football_app/view/home/widgets/drawer_widget.dart';
+
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/home/widgets/tournament_list.dart';
+import 'package:football_app/view/my_registration/my_registration_screen.dart';
+import 'package:football_app/view/profile/profile_screen.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,11 +25,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int activeIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List banners = [
     'assets/images/futsal1.png',
     'assets/images/futsa2.png',
     'assets/images/futsal3.png',
   ];
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -32,7 +39,29 @@ class _HomeScreenState extends State<HomeScreen> {
           TournamentBloc(context.read<TournamentRepository>())
             ..add(const TournamentEvent.loadUpcoming()),
       child: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: Colors.black,
+        drawer: AppDrawer(
+          onTournamentsTap: widget.onViewAllTournaments,
+          onProfileTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ProfileScreen()),
+            );
+          },
+          onMyRegistrationTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => MyRegistrationScreen()),
+            );
+          },
+          onBecomeOrganizerTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => BecomeOrganizerScreen()),
+            );
+          },
+        ),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Column(
@@ -44,11 +73,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        "assets/images/futbookok.png",
-                        color: Colors.white,
-                        height: 100,
-                        fit: BoxFit.contain,
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () =>
+                                _scaffoldKey.currentState?.openDrawer(),
+                            icon: const Icon(Icons.menu, color: Colors.white),
+                          ),
+                          const SizedBox(width: 16), // moved logo to the right
+                          Image.asset(
+                            "assets/images/futhub_white.png",
+                            color: Colors.white,
+                            height: 35,
+                            fit: BoxFit.contain,
+                          ),
+                          SizedBox(height: 30),
+                        ],
                       ),
                       Row(
                         children: [
@@ -72,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.only(
                     left: 20.0,
                     right: 20.0,
+                    top: 16.0, // moved search field down
                     bottom: 12.0,
                   ),
                   child: SearchTextfieldHomeWidget(),
@@ -176,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 final List<Map<String, dynamic>> categories = [
-  {'icon': Icons.apps_rounded, 'text': "All"},
+  {'icon': Icons.apps_rounded, 'text': "Nearby"},
   {'icon': Icons.location_on, 'text': "Nearby"},
   {'icon': Icons.calendar_month, 'text': "Upcoming"},
   {'icon': Icons.local_fire_department, 'text': "Popular"},
