@@ -80,31 +80,57 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<String?> getGoogleCredential() async {
+Future<String?> getGoogleCredential() async {
+  debugPrint('[GoogleAuth] getGoogleCredential() start');
+  try {
     await _ensureGoogle();
-    try {
-      final account = await GoogleSignIn.instance.authenticate();
-      final idToken = account.authentication.idToken;
-      if (idToken == null) {
-        throw BadRequestException('Google did not return an ID token');
-      }
-      return idToken;
-    } on GoogleSignInException catch (e) {
-      debugPrint('GoogleSignInException: ${e.code} ${e.description}');
-      if (e.code == GoogleSignInExceptionCode.canceled) return null;
-      throw BadRequestException(
-        'Google sign-in failed: ${e.description ?? e.code.name}',
-      );
-    }
-  }
 
-  @override
-  Future<AuthResponseModel> loginWithGoogle(String credential) async {
-    final res = await _api.postAPi(ApiConstants.google, {
-      'credential': credential,
-    });
-    return _persist(res);
+    debugPrint('[GoogleAuth] supportsAuthenticate=${GoogleSignIn.instance.supportsAuthenticate()}');
+    debugPrint('[GoogleAuth] calling authenticate()...');
+
+    final account = await GoogleSignIn.instance.authenticate();
+    debugPrint('[GoogleAuth] account id=${account.id} email=${account.email}');
+
+    final idToken = account.authentication.idToken;
+    debugPrint('[GoogleAuth] idToken null? ${idToken == null}, length=${idToken?.length}');
+
+    if (idToken == null) {
+      throw BadRequestException('Google did not return an ID token');
+    }
+    return idToken;
+  } on GoogleSignInException catch (e, st) {
+    debugPrint('[GoogleAuth] GoogleSignInException');
+    debugPrint('  code:        ${e.code}');
+    debugPrint('  description: ${e.description}');
+    debugPrint('  details:     ${e.details}');
+    debugPrintStack(stackTrace: st, maxFrames: 8);
+
+    if (e.code == GoogleSignInExceptionCode.canceled) {
+      debugPrint('[GoogleAuth] canceled (picker dismissed, or no eligible account / config issue)');
+      return null;
+    }
+    throw BadRequestException(
+      'Google sign-in failed: ${e.description ?? e.code.name}',
+    );
+  } catch (e, st) {
+    debugPrint('[GoogleAuth] Unexpected error: ${e.runtimeType}: $e');
+    debugPrintStack(stackTrace: st, maxFrames: 8);
+    rethrow;
   }
+}
+
+ @override
+Future<AuthResponseModel> loginWithGoogle(
+  String credential, {
+  String? organizationName,
+}) async {
+  final res = await _api.postAPi(ApiConstants.google, {
+    'idToken': credential,
+    if (organizationName != null && organizationName.trim().isNotEmpty)
+      'organizationName': organizationName.trim(),
+  });
+  return _persist(res);
+}
 
   @override
   Future<void> changePassword(

@@ -21,6 +21,13 @@ exports.updateOrganization = z.object({
   contactEmail: email.optional(),
 });
 
+exports.google = z.object({
+  idToken: z.string().min(1, 'idToken is required'),
+  organizationName: z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    name.optional()
+  ),
+});
 // ---- tournaments ----
 const tournamentFields = {
   name: z.string().trim().min(2).max(100),

@@ -8,7 +8,6 @@ const asyncHandler = require('../utils/asyncHandler');
 const { uniqueSlug } = require('../utils/slugify');
 const dto = require('../utils/dto');
 
-const googleClient = new OAuth2Client(env.googleClientId);
 
 const signToken = (user) =>
   jwt.sign(
@@ -20,43 +19,51 @@ const signToken = (user) =>
 const orgDto = (org) => (org ? dto.org(org) : null);
 const isDisabled = (user) => !user.isActive || (user.organization && !user.organization.isActive);
 
-// Handles both login and signup.
-// - Existing user (by googleId or email) -> log in (links Google on first use)
-// - New user + organizationName          -> creates org + owner
-// - New user, no organizationName        -> creates user with no organization;
-//                                           client then calls POST /auth/organization
-exports.google = asyncHandler(async (req, res) => {
-  const { credential, organizationName } = req.body;
-  if (!credential) throw new ApiError(400, 'Google credential is required');
 
+const googleClient = new OAuth2Client(env.googleClientId || process.env.GOOGLE_CLIENT_ID);
+
+exports.google = asyncHandler(async (req, res) => {
+  const { idToken, organizationName } = req.body;
+
+  // 1. Verify the token with Google
   let payload;
   try {
-    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: env.googleClientId });
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID, // the Web client ID
+    });
     payload = ticket.getPayload();
-  } catch {
-    throw new ApiError(401, 'Invalid Google credential');
+  } catch (err) {
+    throw new ApiError(401, 'Invalid Google token');
   }
-  // Never link/create by an unverified email
-  if (!payload?.email || !payload.email_verified) throw new ApiError(401, 'Google email is not verified');
+
+  if (!payload?.email || !payload.email_verified) {
+    throw new ApiError(401, 'Google account email not verified');
+  }
 
   const email = payload.email.toLowerCase();
   const googleId = payload.sub;
+  const name = payload.name || email.split('@')[0];
+  const avatarUrl = payload.picture ?? null;
 
+  // 2. Existing user? (match by googleId, or by email for accounts made with a password)
   let user = await prisma.user.findFirst({
     where: { OR: [{ googleId }, { email }] },
     include: { organization: true },
   });
 
-  // ---- Login (existing account) ----
   if (user) {
     if (isDisabled(user)) throw new ApiError(403, 'Account is disabled');
+
+    // Link Google to an existing email/password account
     if (!user.googleId) {
       user = await prisma.user.update({
         where: { id: user.id },
-        data: { googleId, avatarUrl: user.avatarUrl ?? payload.picture ?? null },
+        data: { googleId, avatarUrl: user.avatarUrl ?? avatarUrl },
         include: { organization: true },
       });
     }
+
     return res.json({
       success: true,
       token: signToken(user),
@@ -66,28 +73,25 @@ exports.google = asyncHandler(async (req, res) => {
     });
   }
 
-  // ---- Signup ----
-  const name = payload.name || email.split('@')[0];
+  // 3. New user with an organization name: create org + owner atomically
   const orgName = organizationName?.trim();
-
-  // Organization name supplied: create org + owner together
   if (orgName) {
-    const { org, user: created } = await tx(async (t) => {
+    const { org, created } = await tx(async (t) => {
       const slug = await uniqueSlug('organizations', orgName, null, t);
       const org = await t.organization.create({
         data: { name: orgName, slug, contactEmail: email },
       });
-      const user = await t.user.create({
+      const created = await t.user.create({
         data: {
           organizationId: org.id,
           name,
           email,
           googleId,
-          avatarUrl: payload.picture ?? null,
+          avatarUrl,
           role: 'owner',
         },
       });
-      return { org, user };
+      return { org, created };
     });
 
     return res.status(201).json({
@@ -99,9 +103,9 @@ exports.google = asyncHandler(async (req, res) => {
     });
   }
 
-  // No organization yet
+  // 4. New user without an organization (they can call /organization later)
   const created = await prisma.user.create({
-    data: { name, email, googleId, avatarUrl: payload.picture ?? null },
+    data: { name, email, googleId, avatarUrl },
   });
 
   res.status(201).json({
