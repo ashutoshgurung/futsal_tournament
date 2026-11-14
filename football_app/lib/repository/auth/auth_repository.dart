@@ -1,4 +1,3 @@
-// TODO: adjust this path to wherever your AuthResponseModel lives.
 import 'package:football_app/model/auth_response/auth_response_model.dart';
 
 abstract class AuthRepository {
@@ -9,7 +8,6 @@ abstract class AuthRepository {
   Future<AuthResponseModel> login(String email, String password);
 
   Future<AuthResponseModel> register({
-    required String organizationName,
     required String name,
     required String email,
     required String password,
@@ -18,8 +16,7 @@ abstract class AuthRepository {
   /// Opens the Google account picker. Returns the ID token, or null if cancelled.
   Future<String?> getGoogleCredential();
 
-  /// Throws OrganizationRequiredException for unknown accounts when no org name is given.
-  Future<AuthResponseModel> loginWithGoogle(String credential, {String? organizationName});
+  Future<AuthResponseModel> loginWithGoogle(String credential);
 
   Future<void> changePassword(String currentPassword, String newPassword);
 
@@ -29,4 +26,3 @@ abstract class AuthRepository {
   Future<String?> getSavedToken();
   Future<bool> hasValidSession();
 }
-

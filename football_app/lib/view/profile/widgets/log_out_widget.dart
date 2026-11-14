@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:football_app/view/signin/sign_in_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LogOutWidget extends StatefulWidget {
   const LogOutWidget({super.key});
@@ -9,6 +12,44 @@ class LogOutWidget extends StatefulWidget {
 }
 
 class _LogOutWidgetsState extends State<LogOutWidget> {
+  final _storage = const FlutterSecureStorage();
+
+  Future<void> _logout() async {
+    // Grab these before any await so we don't use a stale context
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      // 1. (Optional) tell your Node backend, e.g. to revoke a refresh token.
+      //    Don't let a network failure block the logout.
+      // try {
+      //   final token = await _storage.read(key: 'token');
+      //   await http.post(
+      //     Uri.parse('https://your-api.com/auth/logout'),
+      //     headers: {'Authorization': 'Bearer $token'},
+      //   ).timeout(const Duration(seconds: 5));
+      // } catch (_) {}
+
+      // 2. Sign out of Google so the account picker shows next time
+      await GoogleSignIn.instance.signOut();
+      // If you are on google_sign_in 7.x or newer, use this instead:
+      // await GoogleSignIn.instance.signOut();
+
+      // 3. Clear the session saved on the device
+      await _storage.delete(key: 'token'); // use the key(s) you saved at login
+      // or wipe everything: await _storage.deleteAll();
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text("Logout failed: $e")));
+      return;
+    }
+
+    // 4. Go to sign in and wipe the back stack
+    navigator.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const SignInScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -50,8 +91,8 @@ class _LogOutWidgetsState extends State<LogOutWidget> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pop(dialogContext);
-                        // TODO: clear session and go to login screen
+                        Navigator.pop(dialogContext); // close dialog
+                        _logout(); // sign out + go to sign in
                       },
                       child: Text(
                         "Logout",

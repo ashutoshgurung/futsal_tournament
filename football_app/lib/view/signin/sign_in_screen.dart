@@ -3,10 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/auth/auth_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
 import 'package:football_app/bloc/auth/auth_state.dart';
-import 'package:football_app/view/common/auth_widgets.dart';
+import 'package:football_app/view/signin/widgets/email_input_widget.dart';
+import 'package:football_app/view/signin/widgets/login_button_widget.dart';
+import 'package:football_app/view/signin/widgets/password_input_widget.dart';
 import 'package:football_app/view/forget_password/forget_password_screen.dart';
 import 'package:football_app/view/signup/signup_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+const _kAccent = Color(0xFFB7F34A);
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -19,7 +23,6 @@ class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _googlePressed = false;
 
   @override
   void dispose() {
@@ -29,31 +32,38 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _login() {
+    final bloc = context.read<AuthBloc>();
+    if (bloc.state.isLoading) return;
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    setState(() => _googlePressed = false);
-    context.read<AuthBloc>().add(AuthEvent.loginRequested(email: _email.text, password: _password.text));
+    bloc.add(AuthEvent.loginRequested(
+      email: _email.text.trim(),
+      password: _password.text,
+    ));
   }
 
   void _google() {
-    setState(() => _googlePressed = true);
-    context.read<AuthBloc>().add(const AuthEvent.googleSignInRequested());
+    final bloc = context.read<AuthBloc>();
+    if (bloc.state.isLoading) return;
+    FocusScope.of(context).unfocus();
+    bloc.add(const AuthEvent.googleSignInRequested());
   }
 
-  Future<void> _onState(BuildContext context, AuthState state) async {
-    // SignupScreen may be pushed on top of this screen - only the visible one reacts.
-    if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
+  void _openSignup() => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SignupScreen()),
+      );
 
-    if (state.organizationRequired) {
-      final org = await askOrganizationName(context, userName: state.googleName);
-      if (!context.mounted) return;
-      if (org != null) {
-        context.read<AuthBloc>().add(AuthEvent.googleOrganizationSubmitted(organizationName: org));
-      }
-    } else if (state.message != null) {
-      showError(context, state.message!);
-    }
-    // success needs no navigation: main.dart swaps the home screen.
+  void _openForgotPassword() => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ForgetPasswordScreen()),
+      );
+
+  void _onState(BuildContext context, AuthState state) {
+    // SignupScreen may be pushed on top: only the visible screen reacts.
+    if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
+    if (state.message != null) _showError(context, state.message!);
+    // Success needs no navigation: main.dart swaps the home screen.
   }
 
   @override
@@ -70,7 +80,9 @@ class _SignInScreenState extends State<SignInScreen> {
             Positioned.fill(
               child: Image.asset('assets/images/login_image.jpg', fit: BoxFit.cover),
             ),
-            Positioned.fill(child: Container(color: Colors.black.withValues(alpha: 0.45))),
+            Positioned.fill(
+              child: Container(color: Colors.black.withValues(alpha: 0.45)),
+            ),
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) => SingleChildScrollView(
@@ -81,8 +93,10 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 30),
                         child: BlocBuilder<AuthBloc, AuthState>(
+                          buildWhen: (p, c) =>
+                              p.status != c.status || p.method != c.method,
                           builder: (context, state) {
-                            final loading = state.status == AuthStatus.loading;
+                            final busy = state.isLoading;
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -97,29 +111,19 @@ class _SignInScreenState extends State<SignInScreen> {
                                         fontWeight: FontWeight.w500,
                                         color: Colors.white)),
                                 const SizedBox(height: 50),
-                                AuthTextField(
-                                  controller: _email,
-                                  hint: 'Email address',
-                                  icon: Icons.email_outlined,
-                                  keyboardType: TextInputType.emailAddress,
-                                  validator: (v) {
-                                    final s = v?.trim() ?? '';
-                                    if (s.isEmpty) return 'Email is required';
-                                    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s)) {
-                                      return 'Enter a valid email';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 15),
-                                AuthTextField(
-                                  controller: _password,
-                                  hint: 'Password',
-                                  icon: Icons.lock_outline,
-                                  isPassword: true,
-                                  textInputAction: TextInputAction.done,
-                                  validator: (v) =>
-                                      (v == null || v.isEmpty) ? 'Password is required' : null,
+                                IgnorePointer(
+                                  ignoring: busy,
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 150),
+                                    opacity: busy ? 0.6 : 1,
+                                    child: Column(
+                                      children: [
+                                        EmailInputWidget(controller: _email),
+                                        const SizedBox(height: 15),
+                                        PasswordInputWidget(controller: _password),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 15),
                                 Padding(
@@ -127,11 +131,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   child: Align(
                                     alignment: Alignment.centerRight,
                                     child: GestureDetector(
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) => ForgetPasswordScreen()),
-                                      ),
+                                      onTap: busy ? null : _openForgotPassword,
                                       child: Text('Forgot Password?',
                                           style: GoogleFonts.poppins(
                                               fontSize: 12,
@@ -141,17 +141,16 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 25),
-                                PrimaryButton(
-                                  label: 'Login',
-                                  loading: loading && !_googlePressed,
-                                  onPressed: loading ? null : _login,
+                                LoginButtonWidget(
+                                  onPressed: _login,
+                                  isLoading: state.isEmailLoading,
                                 ),
                                 const SizedBox(height: 30),
-                                const OrDivider(text: 'Or sign in with'),
+                                const _OrDivider(text: 'Or sign in with'),
                                 const SizedBox(height: 25),
-                                GoogleButton(
-                                  loading: loading && _googlePressed,
-                                  onPressed: loading ? null : _google,
+                                _GoogleButton(
+                                  loading: state.isGoogleLoading,
+                                  onPressed: busy ? null : _google,
                                 ),
                                 const SizedBox(height: 40),
                                 Row(
@@ -161,16 +160,12 @@ class _SignInScreenState extends State<SignInScreen> {
                                         style: GoogleFonts.poppins(
                                             fontSize: 12, color: Colors.white70)),
                                     InkWell(
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) => const SignupScreen()),
-                                      ),
+                                      onTap: busy ? null : _openSignup,
                                       child: Text('Sign Up',
                                           style: GoogleFonts.poppins(
                                               fontSize: 12,
                                               fontWeight: FontWeight.bold,
-                                              color: kAccent)),
+                                              color: _kAccent)),
                                     ),
                                   ],
                                 ),
@@ -185,6 +180,87 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+void _showError(BuildContext context, String message) {
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(
+      content: Text(message, style: GoogleFonts.poppins(fontSize: 13)),
+      backgroundColor: Colors.red.shade700,
+      behavior: SnackBarBehavior.floating,
+    ));
+}
+
+class _OrDivider extends StatelessWidget {
+  final String text;
+  const _OrDivider({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final line = Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.3)));
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: [
+          line,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(text,
+                style: GoogleFonts.poppins(fontSize: 12, color: Colors.white70)),
+          ),
+          line,
+        ],
+      ),
+    );
+  }
+}
+
+class _GoogleButton extends StatelessWidget {
+  final bool loading;
+  final VoidCallback? onPressed;
+  const _GoogleButton({required this.loading, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        width: double.infinity,
+        height: 55,
+        child: OutlinedButton(
+          onPressed: onPressed,
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            disabledBackgroundColor: Colors.white70,
+            side: BorderSide.none,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+          ),
+          child: loading
+              ? const SizedBox(
+                  height: 22,
+                  width: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black87),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('G',
+                        style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF4285F4))),
+                    const SizedBox(width: 10),
+                    Text('Google',
+                        style: GoogleFonts.poppins(
+                            fontSize: 14, fontWeight: FontWeight.w600)),
+                  ],
+                ),
         ),
       ),
     );

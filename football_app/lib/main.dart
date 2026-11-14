@@ -24,10 +24,7 @@ const Duration fadeDuration = Duration(milliseconds: 400);
 
 /// Android emulator: http://10.0.2.2:3000/api
 /// For release builds, pass it in with --dart-define=API_BASE_URL=https://your-api.com/api
-const String apiBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://10.0.2.2:3000/api',
-);
+
 
 /// Set at the very start of main().
 late final DateTime _appStart;
