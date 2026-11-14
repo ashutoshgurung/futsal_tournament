@@ -11,7 +11,7 @@ import 'package:football_app/model/auth_response/auth_response_model.dart';
 import 'package:football_app/repository/auth/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-abstract class AuthRepositoryImpl implements AuthRepository {
+ class AuthRepositoryImpl implements AuthRepository {
   final BaseApiServices _api;
   final TokenStorage _storage;
   AuthRepositoryImpl(this._api, this._storage);
@@ -116,5 +116,23 @@ abstract class AuthRepositoryImpl implements AuthRepository {
       await _ensureGoogle();
       await GoogleSignIn.instance.signOut();
     } catch (_) {}
+  }
+
+  @override
+  Future<String?> getSavedToken() {
+    // TODO: implement getSavedToken
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> hasValidSession() {
+    // TODO: implement hasValidSession
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> verifySessionInBackground() {
+    // TODO: implement verifySessionInBackground
+    throw UnimplementedError();
   }
 }
