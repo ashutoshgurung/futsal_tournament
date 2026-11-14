@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AuthResponseModel {
 
- String get token; UserModel? get user; OrganizationModel? get organization;
+ bool get success; String get token; Map<String, dynamic>? get user; Map<String, dynamic>? get organization; bool get isNewUser;
 /// Create a copy of AuthResponseModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $AuthResponseModelCopyWith<AuthResponseModel> get copyWith => _$AuthResponseMode
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthResponseModel&&(identical(other.token, token) || other.token == token)&&(identical(other.user, user) || other.user == user)&&(identical(other.organization, organization) || other.organization == organization));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthResponseModel&&(identical(other.success, success) || other.success == success)&&(identical(other.token, token) || other.token == token)&&const DeepCollectionEquality().equals(other.user, user)&&const DeepCollectionEquality().equals(other.organization, organization)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,token,user,organization);
+int get hashCode => Object.hash(runtimeType,success,token,const DeepCollectionEquality().hash(user),const DeepCollectionEquality().hash(organization),isNewUser);
 
 @override
 String toString() {
-  return 'AuthResponseModel(token: $token, user: $user, organization: $organization)';
+  return 'AuthResponseModel(success: $success, token: $token, user: $user, organization: $organization, isNewUser: $isNewUser)';
 }
 
 
@@ -48,11 +48,11 @@ abstract mixin class $AuthResponseModelCopyWith<$Res>  {
   factory $AuthResponseModelCopyWith(AuthResponseModel value, $Res Function(AuthResponseModel) _then) = _$AuthResponseModelCopyWithImpl;
 @useResult
 $Res call({
- String token, UserModel? user, OrganizationModel? organization
+ bool success, String token, Map<String, dynamic>? user, Map<String, dynamic>? organization, bool isNewUser
 });
 
 
-$UserModelCopyWith<$Res>? get user;$OrganizationModelCopyWith<$Res>? get organization;
+
 
 }
 /// @nodoc
@@ -65,39 +65,17 @@ class _$AuthResponseModelCopyWithImpl<$Res>
 
 /// Create a copy of AuthResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? token = null,Object? user = freezed,Object? organization = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? token = null,Object? user = freezed,Object? organization = freezed,Object? isNewUser = null,}) {
   return _then(_self.copyWith(
-token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
 as String,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserModel?,organization: freezed == organization ? _self.organization : organization // ignore: cast_nullable_to_non_nullable
-as OrganizationModel?,
+as Map<String, dynamic>?,organization: freezed == organization ? _self.organization : organization // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
-/// Create a copy of AuthResponseModel
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$UserModelCopyWith<$Res>? get user {
-    if (_self.user == null) {
-    return null;
-  }
 
-  return $UserModelCopyWith<$Res>(_self.user!, (value) {
-    return _then(_self.copyWith(user: value));
-  });
-}/// Create a copy of AuthResponseModel
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$OrganizationModelCopyWith<$Res>? get organization {
-    if (_self.organization == null) {
-    return null;
-  }
-
-  return $OrganizationModelCopyWith<$Res>(_self.organization!, (value) {
-    return _then(_self.copyWith(organization: value));
-  });
-}
 }
 
 
@@ -179,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String token,  UserModel? user,  OrganizationModel? organization)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String token,  Map<String, dynamic>? user,  Map<String, dynamic>? organization,  bool isNewUser)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthResponseModel() when $default != null:
-return $default(_that.token,_that.user,_that.organization);case _:
+return $default(_that.success,_that.token,_that.user,_that.organization,_that.isNewUser);case _:
   return orElse();
 
 }
@@ -200,10 +178,10 @@ return $default(_that.token,_that.user,_that.organization);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String token,  UserModel? user,  OrganizationModel? organization)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String token,  Map<String, dynamic>? user,  Map<String, dynamic>? organization,  bool isNewUser)  $default,) {final _that = this;
 switch (_that) {
 case _AuthResponseModel():
-return $default(_that.token,_that.user,_that.organization);case _:
+return $default(_that.success,_that.token,_that.user,_that.organization,_that.isNewUser);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -220,10 +198,10 @@ return $default(_that.token,_that.user,_that.organization);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String token,  UserModel? user,  OrganizationModel? organization)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String token,  Map<String, dynamic>? user,  Map<String, dynamic>? organization,  bool isNewUser)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthResponseModel() when $default != null:
-return $default(_that.token,_that.user,_that.organization);case _:
+return $default(_that.success,_that.token,_that.user,_that.organization,_that.isNewUser);case _:
   return null;
 
 }
@@ -235,12 +213,30 @@ return $default(_that.token,_that.user,_that.organization);case _:
 @JsonSerializable()
 
 class _AuthResponseModel implements AuthResponseModel {
-   _AuthResponseModel({this.token = '', this.user, this.organization});
+  const _AuthResponseModel({this.success = true, required this.token, final  Map<String, dynamic>? user, final  Map<String, dynamic>? organization, this.isNewUser = false}): _user = user,_organization = organization;
   factory _AuthResponseModel.fromJson(Map<String, dynamic> json) => _$AuthResponseModelFromJson(json);
 
-@override@JsonKey() final  String token;
-@override final  UserModel? user;
-@override final  OrganizationModel? organization;
+@override@JsonKey() final  bool success;
+@override final  String token;
+ final  Map<String, dynamic>? _user;
+@override Map<String, dynamic>? get user {
+  final value = _user;
+  if (value == null) return null;
+  if (_user is EqualUnmodifiableMapView) return _user;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+ final  Map<String, dynamic>? _organization;
+@override Map<String, dynamic>? get organization {
+  final value = _organization;
+  if (value == null) return null;
+  if (_organization is EqualUnmodifiableMapView) return _organization;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+@override@JsonKey() final  bool isNewUser;
 
 /// Create a copy of AuthResponseModel
 /// with the given fields replaced by the non-null parameter values.
@@ -255,16 +251,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthResponseModel&&(identical(other.token, token) || other.token == token)&&(identical(other.user, user) || other.user == user)&&(identical(other.organization, organization) || other.organization == organization));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthResponseModel&&(identical(other.success, success) || other.success == success)&&(identical(other.token, token) || other.token == token)&&const DeepCollectionEquality().equals(other._user, _user)&&const DeepCollectionEquality().equals(other._organization, _organization)&&(identical(other.isNewUser, isNewUser) || other.isNewUser == isNewUser));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,token,user,organization);
+int get hashCode => Object.hash(runtimeType,success,token,const DeepCollectionEquality().hash(_user),const DeepCollectionEquality().hash(_organization),isNewUser);
 
 @override
 String toString() {
-  return 'AuthResponseModel(token: $token, user: $user, organization: $organization)';
+  return 'AuthResponseModel(success: $success, token: $token, user: $user, organization: $organization, isNewUser: $isNewUser)';
 }
 
 
@@ -275,11 +271,11 @@ abstract mixin class _$AuthResponseModelCopyWith<$Res> implements $AuthResponseM
   factory _$AuthResponseModelCopyWith(_AuthResponseModel value, $Res Function(_AuthResponseModel) _then) = __$AuthResponseModelCopyWithImpl;
 @override @useResult
 $Res call({
- String token, UserModel? user, OrganizationModel? organization
+ bool success, String token, Map<String, dynamic>? user, Map<String, dynamic>? organization, bool isNewUser
 });
 
 
-@override $UserModelCopyWith<$Res>? get user;@override $OrganizationModelCopyWith<$Res>? get organization;
+
 
 }
 /// @nodoc
@@ -292,40 +288,18 @@ class __$AuthResponseModelCopyWithImpl<$Res>
 
 /// Create a copy of AuthResponseModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? token = null,Object? user = freezed,Object? organization = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? token = null,Object? user = freezed,Object? organization = freezed,Object? isNewUser = null,}) {
   return _then(_AuthResponseModel(
-token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
-as String,user: freezed == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
-as UserModel?,organization: freezed == organization ? _self.organization : organization // ignore: cast_nullable_to_non_nullable
-as OrganizationModel?,
+success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
+as bool,token: null == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
+as String,user: freezed == user ? _self._user : user // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,organization: freezed == organization ? _self._organization : organization // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,isNewUser: null == isNewUser ? _self.isNewUser : isNewUser // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
-/// Create a copy of AuthResponseModel
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$UserModelCopyWith<$Res>? get user {
-    if (_self.user == null) {
-    return null;
-  }
 
-  return $UserModelCopyWith<$Res>(_self.user!, (value) {
-    return _then(_self.copyWith(user: value));
-  });
-}/// Create a copy of AuthResponseModel
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$OrganizationModelCopyWith<$Res>? get organization {
-    if (_self.organization == null) {
-    return null;
-  }
-
-  return $OrganizationModelCopyWith<$Res>(_self.organization!, (value) {
-    return _then(_self.copyWith(organization: value));
-  });
-}
 }
 
 // dart format on

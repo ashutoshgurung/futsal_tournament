@@ -1,102 +1,116 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
 import 'package:football_app/bloc/auth/auth_state.dart';
-import 'package:football_app/data/exceptions/app_exceptions.dart';
+import 'package:football_app/data/exceptions/error_message.dart';
+import 'package:football_app/data/exceptions/organization_required_exception.dart';
 import 'package:football_app/model/auth_response/auth_response_model.dart';
 import 'package:football_app/repository/auth/auth_repository.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _repo;
+  String? _pendingGoogleCredential;
 
-  AuthBloc(this._repo) : super(const AuthState()) {
+  AuthBloc(this._repo) : super(const AuthState(message: 'message')) {
     on<AppStarted>(_onAppStarted);
     on<LoginRequested>(_onLogin);
     on<RegisterRequested>(_onRegister);
+    on<GoogleSignInRequested>(_onGoogle);
+    on<GoogleOrganizationSubmitted>(_onGoogleOrg);
     on<LogoutRequested>(_onLogout);
     on<SessionExpired>(_onSessionExpired);
   }
 
-  /// Fast local check first (splash goes away immediately), then the server
-  /// verifies the token in the background.
-  Future<void> _onAppStarted(AppStarted event, Emitter<AuthState> emit) async {
-    bool valid;
+  AuthState _ok(AuthResponseModel? s) =>
+      AuthState(status: AuthStatus.success, session: s, message: 'Logged in successfully.');
+
+  AuthState _fail(Object e) =>
+      AuthState(status: AuthStatus.failure, message: errorMessage(e));
+
+  static const _loading = AuthState(status: AuthStatus.loading, message: 'Loading...');
+  static const _loggedOut = AuthState(status: AuthStatus.unauthenticated, message: 'Not logged in.');
+
+  Future<void> _onAppStarted(AppStarted e, Emitter<AuthState> emit) async {
     try {
-      valid = await _repo.hasValidSession();
+      final r = await _repo.restoreSession();
+      emit(r.loggedIn ? _ok(r.session) : _loggedOut);
     } catch (_) {
-      valid = false;
-    }
-
-    emit(state.copyWith(
-      status: valid ? AuthStatus.success : AuthStatus.unauthenticated,
-    ));
-
-    if (!valid) return;
-
-    // Home screen is already visible; verify with the server quietly.
-    try {
-      await _repo.verifySessionInBackground();
-    } on UnAuthorizedException {
-      add(const AuthEvent.sessionExpired());
-    } catch (_) {
-      // offline, timeout, 5xx: keep the user logged in
+      emit(_loggedOut);
     }
   }
 
-  Future<void> _onLogin(LoginRequested event, Emitter<AuthState> emit) {
-    return _run(emit, () => _repo.login(event.email, event.password));
-  }
-
-  Future<void> _onRegister(RegisterRequested event, Emitter<AuthState> emit) {
-    return _run(
-      emit,
-      () => _repo.register(
-        organizationName: event.organizationName,
-        name: event.name,
-        email: event.email,
-        password: event.password,
-      ),
-    );
-  }
-
-  Future<void> _onLogout(LogoutRequested event, Emitter<AuthState> emit) async {
-    await _repo.logout();
-    emit(const AuthState(status: AuthStatus.unauthenticated));
-  }
-
-  /// Fired by NetworkApiServices when the server rejects the token (401).
-  Future<void> _onSessionExpired(
-    SessionExpired event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const AuthState(status: AuthStatus.unauthenticated));
-  }
-
-  Future<void> _run(
-    Emitter<AuthState> emit,
-    Future<AuthResponseModel> Function() call,
-  ) async {
-    emit(state.copyWith(status: AuthStatus.loading, message: null));
+  Future<void> _onLogin(LoginRequested e, Emitter<AuthState> emit) async {
+    emit(_loading);
     try {
-      final res = await call();
-      if (res.token.isEmpty) {
-        emit(state.copyWith(
-          status: AuthStatus.failure,
-          message: 'Something went wrong',
-        ));
+      emit(_ok(await _repo.login(e.email, e.password)));
+    } catch (err) {
+      emit(_fail(err));
+    }
+  }
+
+  Future<void> _onRegister(RegisterRequested e, Emitter<AuthState> emit) async {
+    emit(_loading);
+    try {
+      emit(_ok(await _repo.register(
+        organizationName: e.organizationName,
+        name: e.name,
+        email: e.email,
+        password: e.password,
+      )));
+    } catch (err) {
+      emit(_fail(err));
+    }
+  }
+
+  Future<void> _onGoogle(GoogleSignInRequested e, Emitter<AuthState> emit) async {
+    emit(_loading);
+    _pendingGoogleCredential = null;
+    try {
+      final credential = await _repo.getGoogleCredential();
+      if (credential == null) {
+        emit(_loggedOut); // user cancelled the picker
         return;
       }
-      emit(state.copyWith(
-        status: AuthStatus.success,
-        session: res,
-        message: null,
-      ));
-    } on AppExceptions catch (e) {
-      emit(state.copyWith(status: AuthStatus.failure, message: e.userMessage));
-    } catch (_) {
-      emit(state.copyWith(
-        status: AuthStatus.failure,
-        message: 'Something went wrong. Please try again.',
-      ));
+      try {
+        emit(_ok(await _repo.loginWithGoogle(credential)));
+      } on OrganizationRequiredException catch (err) {
+        _pendingGoogleCredential = credential;
+        emit(AuthState(
+          status: AuthStatus.failure,
+          organizationRequired: true,
+          googleName: err.profileName, message: 'Organization required for this Google account. Please enter your organization name to continue.',
+        ));
+      }
+    } catch (err) {
+      emit(_fail(err));
     }
+  }
+
+  Future<void> _onGoogleOrg(GoogleOrganizationSubmitted e, Emitter<AuthState> emit) async {
+    final credential = _pendingGoogleCredential;
+    if (credential == null) {
+      emit(_loggedOut);
+      return;
+    }
+    emit(_loading);
+    try {
+      final s = await _repo.loginWithGoogle(credential, organizationName: e.organizationName);
+      _pendingGoogleCredential = null;
+      emit(_ok(s));
+    } catch (err) {
+      emit(_fail(err));
+    }
+  }
+
+  Future<void> _onLogout(LogoutRequested e, Emitter<AuthState> emit) async {
+    await _repo.logout();
+    emit(_loggedOut);
+  }
+
+  Future<void> _onSessionExpired(SessionExpired e, Emitter<AuthState> emit) async {
+    await _repo.logout();
+    emit(const AuthState(
+      status: AuthStatus.unauthenticated,
+      message: 'Session expired. Please sign in again.',
+    ));
   }
 }

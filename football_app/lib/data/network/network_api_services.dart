@@ -106,12 +106,14 @@
 //   }
 // }
 
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'package:football_app/data/exceptions/app_exceptions.dart';
+import 'package:football_app/data/exceptions/organization_required_exception.dart'; // CHANGED
 import 'package:football_app/data/network/api_constants.dart';
 import 'package:football_app/data/network/base_api_services.dart';
 import 'package:football_app/data/storage/token_storage.dart';
@@ -136,10 +138,11 @@ class NetworkApiServices implements BaseApiServices {
     return headers;
   }
 
-  /// Endpoints that must NOT send a token (a wrong password also returns 401).
+  /// Endpoints that must NOT send a token (a wrong password / bad Google token also returns 401).
   bool _isPublic(String url) =>
       url == ApiConstants.login ||
       url == ApiConstants.register ||
+      url == ApiConstants.google || // CHANGED
       url.startsWith(ApiConstants.publicTournaments);
 
   @override
@@ -164,8 +167,6 @@ class NetworkApiServices implements BaseApiServices {
     dynamic data,
     String? token,
   }) async {
-    // An explicitly passed token (e.g. the startup check) is used as is and
-    // does not trigger the global 401 redirect. Otherwise we attach it automatically.
     final autoAuth = token == null && !_isPublic(url);
     final effectiveToken =
         token ?? (autoAuth ? await _tokenStorage.readToken() : null);
@@ -210,6 +211,16 @@ class NetworkApiServices implements BaseApiServices {
     }
 
     final msg = _errorMessage(response);
+
+    // CHANGED: backend answers 404 {code:'ORGANIZATION_REQUIRED', profile:{name,email}}
+    final body = _tryDecode(response.body);
+    if (body is Map && body['code'] == 'ORGANIZATION_REQUIRED') {
+      throw OrganizationRequiredException(
+        msg ?? 'Organization name is required',
+        profileName: (body['profile'] is Map) ? body['profile']['name'] as String? : null,
+      );
+    }
+
     switch (code) {
       case 400:
       case 422:
@@ -232,13 +243,17 @@ class NetworkApiServices implements BaseApiServices {
     }
   }
 
-  String? _errorMessage(http.Response response) {
+  dynamic _tryDecode(String raw) {
     try {
-      final body = jsonDecode(response.body);
-      if (body is Map && body['message'] is String) {
-        return body['message'] as String;
-      }
-    } catch (_) {}
+      return jsonDecode(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _errorMessage(http.Response response) {
+    final body = _tryDecode(response.body);
+    if (body is Map && body['message'] is String) return body['message'] as String;
     return null;
   }
 }

@@ -114,25 +114,43 @@ exports.register = asyncHandler(async (req, res) => {
 
   res.status(201).json({ success: true, token: signToken(user), user: dto.user(user), organization: dto.org(org) });
 });
-
+// ---- REPLACE exports.login in authController.js with this ----
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  // login
-if (!user || !user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
-  throw new ApiError(401, 'Invalid email or password');
-}
 
-// changePassword: let Google-only users set a first password
-const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { passwordHash: true } });
-if (user?.passwordHash && !(await bcrypt.compare(req.body.currentPassword, user.passwordHash))) {
-  throw new ApiError(400, 'Current password is incorrect');
-}
-  const org = user.organization;
-  if (!user.isActive || !org?.isActive) throw new ApiError(403, 'Account is disabled');
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+    include: { organization: true },
+  });
 
-  res.json({ success: true, token: signToken(user), user: dto.user(user), organization: dto.org(org) });
+  // Google-only accounts have no passwordHash -> generic error
+  if (!user || !user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
+    throw new ApiError(401, 'Invalid email or password');
+  }
+  if (!user.isActive || !user.organization?.isActive) throw new ApiError(403, 'Account is disabled');
+
+  res.json({
+    success: true,
+    token: signToken(user),
+    user: dto.user(user),
+    organization: dto.org(user.organization),
+  });
 });
 
+// ---- REPLACE exports.changePassword with this (lets Google-only users set a first password) ----
+exports.changePassword = asyncHandler(async (req, res) => {
+  const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { passwordHash: true } });
+  if (!user) throw new ApiError(404, 'User not found');
+  if (user.passwordHash && !(await bcrypt.compare(req.body.currentPassword || '', user.passwordHash))) {
+    throw new ApiError(400, 'Current password is incorrect');
+  }
+  const hash = await bcrypt.hash(req.body.newPassword, 12);
+  await prisma.user.update({ where: { id: req.user.id }, data: { passwordHash: hash } });
+  res.json({ success: true, message: 'Password updated' });
+});
+
+// ---- In exports.register also normalise the email, since login/google lowercase it ----
+// const email = req.body.email.toLowerCase();
 exports.me = asyncHandler(async (req, res) => {
   res.json({ success: true, user: req.user, organization: req.org });
 });
