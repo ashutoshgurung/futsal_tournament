@@ -17,6 +17,7 @@ router.post('/register', limiter, validate(s.register), c.register);
 router.post('/google', limiter, validate(s.google), c.google);
 router.post('/login', limiter, validate(s.login), c.login);
 router.get('/me', protect, c.me);
+router.post('/organization', protect, validate(s.createOrganization), c.createOrganization);
 router.put('/password', protect, validate(s.changePassword), c.changePassword);
 
 module.exports = router;
