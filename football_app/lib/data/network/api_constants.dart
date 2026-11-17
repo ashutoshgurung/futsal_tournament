@@ -10,10 +10,10 @@ class ApiConstants {
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
     if (kIsWeb) return 'http://localhost:$_port';
-    if (Platform.isAndroid) {
-      return 'http://192.168.1.144:$_port'; // Android emulator -> your Mac
-    }
-    return 'http://localhost:$_port'; // iOS simulator, macOS
+    if (Platform.isWindows) return 'http://192.168.1.121:$_port';
+    if (Platform.isMacOS) return 'http://localhost:$_port';
+    if (Platform.isAndroid) return 'http://10.0.2.2:$_port'; // Android emulator
+    return 'http://127.0.0.1:$_port'; // iOS simulator / Linux
   }
 
   // Endpoints (getters, because baseUrl is no longer a compile-time constant)
@@ -25,8 +25,10 @@ class ApiConstants {
   static String get google => '$baseUrl/api/auth/google';
   static String get changePassword => '$baseUrl/api/auth/password';
   static String get organization => '$baseUrl/api/organization';
+    static String get verifyEmail => '$baseUrl/api/auth/verify-email';
+  static String get resendVerification => '$baseUrl/api/auth/resend-verification';
 
-  static const Duration timeout = Duration(seconds: 20);
+  static const Duration timeout = Duration(seconds: 250);
 
   /// The *Web* OAuth client ID (same value as GOOGLE_CLIENT_ID in the backend .env).
   /// Override with: --dart-define=GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com

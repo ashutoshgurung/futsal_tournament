@@ -9,7 +9,10 @@
     "prisma:generate": "prisma generate",
     "migrate": "node src/db/migrate.js",
     "migrate:dev": "node src/db/migrate.js dev",
-    "seed": "node src/db/seed.js"
+    "seed": "node src/db/seed.js",
+    "clean": "node -e \"require('fs').rmSync('node_modules/.prisma',{recursive:true,force:true})\"",
+    "clean:all": "node -e \"['node_modules','package-lock.json'].forEach(p=>require('fs').rmSync(p,{recursive:true,force:true}))\"",
+    "reset": "npm run clean:all && npm install && npm run prisma:generate"
   },
   "license": "MIT",
   "engines": {
@@ -27,11 +30,12 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^2.5.0",
+    "nodemailer": "^10.6.0",
+    "prisma": "^6.19.3",
     "sharp": "^0.35.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9",
-    "prisma": "^6.19.0"
+    "nodemon": "^3.1.9"
   }
 }

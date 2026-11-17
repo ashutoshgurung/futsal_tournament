@@ -1,13 +1,14 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { OAuth2Client } = require('google-auth-library');
+const { UserRole } = require('@prisma/client');
 const env = require('../config/env');
 const { prisma, tx } = require('../config/db');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { uniqueSlug } = require('../utils/slugify');
 const dto = require('../utils/dto');
-
+const { hashToken, trySendVerification } = require('../utils/emailVerification');
 
 const signToken = (user) =>
   jwt.sign(
@@ -19,9 +20,11 @@ const signToken = (user) =>
 const orgDto = (org) => (org ? dto.org(org) : null);
 const isDisabled = (user) => !user.isActive || (user.organization && !user.organization.isActive);
 
-
 const googleClient = new OAuth2Client(env.googleClientId || process.env.GOOGLE_CLIENT_ID);
 
+// ---------------------------------------------------------------------------
+// Google sign-in (Google has already verified the email, so users are verified)
+// ---------------------------------------------------------------------------
 exports.google = asyncHandler(async (req, res) => {
   const { idToken, organizationName } = req.body;
 
@@ -55,11 +58,16 @@ exports.google = asyncHandler(async (req, res) => {
   if (user) {
     if (isDisabled(user)) throw new ApiError(403, 'Account is disabled');
 
-    // Link Google to an existing email/password account
-    if (!user.googleId) {
+    // Link Google to an existing email/password account and mark the email verified
+    if (!user.googleId || !user.emailVerified) {
       user = await prisma.user.update({
         where: { id: user.id },
-        data: { googleId, avatarUrl: user.avatarUrl ?? avatarUrl },
+        data: {
+          googleId,
+          avatarUrl: user.avatarUrl ?? avatarUrl,
+          emailVerified: true,
+          emailVerifiedAt: user.emailVerifiedAt ?? new Date(),
+        },
         include: { organization: true },
       });
     }
@@ -73,7 +81,7 @@ exports.google = asyncHandler(async (req, res) => {
     });
   }
 
-  // 3. New user with an organization name: create org + owner atomically
+  // 3. New user with an organization name: create org + organizer atomically
   const orgName = organizationName?.trim();
   if (orgName) {
     const { org, created } = await tx(async (t) => {
@@ -88,7 +96,9 @@ exports.google = asyncHandler(async (req, res) => {
           email,
           googleId,
           avatarUrl,
-          role: 'owner',
+          role: UserRole.organizer,
+          emailVerified: true,
+          emailVerifiedAt: new Date(),
         },
       });
       return { org, created };
@@ -103,9 +113,16 @@ exports.google = asyncHandler(async (req, res) => {
     });
   }
 
-  // 4. New user without an organization (they can call /organization later)
+  // 4. New user without an organization (default role: user; can call /organization later)
   const created = await prisma.user.create({
-    data: { name, email, googleId, avatarUrl },
+    data: {
+      name,
+      email,
+      googleId,
+      avatarUrl,
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+    },
   });
 
   res.status(201).json({
@@ -117,6 +134,9 @@ exports.google = asyncHandler(async (req, res) => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Email + password registration (no token until the email is verified)
+// ---------------------------------------------------------------------------
 exports.register = asyncHandler(async (req, res) => {
   const { organizationName, name, password, contactEmail, logoUrl } = req.body;
   const email = req.body.email.toLowerCase();
@@ -127,7 +147,7 @@ exports.register = asyncHandler(async (req, res) => {
     const taken = await t.user.findUnique({ where: { email }, select: { id: true } });
     if (taken) throw new ApiError(409, 'Email already registered');
 
-    // Player sign-up: no organization
+    // Regular sign-up: no organization, role falls back to the schema default (user)
     if (!orgName) {
       const user = await t.user.create({ data: { name, email, passwordHash } });
       return { org: null, user };
@@ -143,19 +163,25 @@ exports.register = asyncHandler(async (req, res) => {
       },
     });
     const user = await t.user.create({
-      data: { organizationId: org.id, name, email, passwordHash, role: 'owner' },
+      data: { organizationId: org.id, name, email, passwordHash, role: UserRole.organizer },
     });
     return { org, user };
   });
 
+  // Fire-and-forget: a mail failure must not break signup (user can resend)
+  trySendVerification(user);
+
   res.status(201).json({
     success: true,
-    token: signToken(user),
+    message: 'Account created. Check your email to verify your address.',
     user: dto.user(user),
     organization: orgDto(org),
   });
 });
 
+// ---------------------------------------------------------------------------
+// Login
+// ---------------------------------------------------------------------------
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -169,6 +195,7 @@ exports.login = asyncHandler(async (req, res) => {
     throw new ApiError(401, 'Invalid email or password');
   }
   if (isDisabled(user)) throw new ApiError(403, 'Account is disabled');
+  if (!user.emailVerified) throw new ApiError(403, 'Please verify your email before logging in');
 
   res.json({
     success: true,
@@ -178,7 +205,47 @@ exports.login = asyncHandler(async (req, res) => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Email verification
+// ---------------------------------------------------------------------------
+exports.verifyEmail = asyncHandler(async (req, res) => {
+  const token = String(req.query.token || req.body?.token || '');
+  if (!token) throw new ApiError(400, 'Token is required');
+
+  const record = await prisma.emailVerificationToken.findUnique({
+    where: { tokenHash: hashToken(token) },
+  });
+  if (!record || record.expiresAt < new Date()) {
+    throw new ApiError(400, 'Invalid or expired verification link');
+  }
+
+  await tx(async (t) => {
+    await t.user.update({
+      where: { id: record.userId },
+      data: { emailVerified: true, emailVerifiedAt: new Date() },
+    });
+    await t.emailVerificationToken.deleteMany({ where: { userId: record.userId } });
+  });
+
+  res.json({ success: true, message: 'Email verified. You can now log in.' });
+});
+
+exports.resendVerification = asyncHandler(async (req, res) => {
+  const email = String(req.body.email || '').toLowerCase();
+  const user = email ? await prisma.user.findUnique({ where: { email } }) : null;
+
+  if (user && user.isActive && !user.emailVerified) await trySendVerification(user);
+
+  // Same response either way so this can't be used to discover registered emails
+  res.json({
+    success: true,
+    message: 'If that account exists and is unverified, a new email has been sent.',
+  });
+});
+
+// ---------------------------------------------------------------------------
 // For users who signed up without an organization
+// ---------------------------------------------------------------------------
 exports.createOrganization = asyncHandler(async (req, res) => {
   const name = req.body.organizationName?.trim();
   if (!name) throw new ApiError(400, 'Organization name is required');
@@ -192,7 +259,7 @@ exports.createOrganization = asyncHandler(async (req, res) => {
     // organizationId: null in the filter makes this safe against double submits
     const { count } = await t.user.updateMany({
       where: { id: req.user.id, organizationId: null },
-      data: { organizationId: org.id, role: 'owner' },
+      data: { organizationId: org.id, role: UserRole.organizer },
     });
     if (!count) throw new ApiError(409, 'You already belong to an organization');
 

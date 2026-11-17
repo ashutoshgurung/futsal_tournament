@@ -13,6 +13,10 @@ const limiter = rateLimit({
   message: { success: false, message: 'Too many attempts, please try again later' },
 });
 
+
+router.get('/verify-email', c.verifyEmail);
+router.post('/resend-verification', limiter, c.resendVerification);
+
 router.post('/register', limiter, validate(s.register), c.register);
 router.post('/google', limiter, validate(s.google), c.google);
 router.post('/login', limiter, validate(s.login), c.login);
