@@ -6,7 +6,18 @@ const password = z.string().min(8, 'Password must be at least 8 characters').max
 const name = z.string().trim().min(2).max(80);
 
 // ---- auth / users / org ----
-exports.register = z.object({ organizationName: name, name, email, password });
+// Treat "" and null as "not provided"
+const emptyToUndef = (v) =>
+  v === null || (typeof v === 'string' && v.trim() === '') ? undefined : v;
+
+exports.register = z.object({
+  organizationName: z.preprocess(emptyToUndef, name.optional()), // omitted => player account
+  contactEmail: z.preprocess(emptyToUndef, email.optional()),
+  logoUrl: z.preprocess(emptyToUndef, z.string().trim().url().max(500).optional()),
+  name,
+  email,
+  password,
+});
 exports.login = z.object({ email, password: z.string().min(1) });
 exports.changePassword = z.object({ currentPassword: z.string().min(1), newPassword: password });
 exports.createUser = z.object({ name, email, password, role: z.enum(['admin', 'scorekeeper']).default('scorekeeper') });

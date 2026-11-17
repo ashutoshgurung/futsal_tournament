@@ -117,19 +117,30 @@ exports.google = asyncHandler(async (req, res) => {
   });
 });
 
-// SaaS sign-up: creates a new organization (tenant) and its owner account atomically
 exports.register = asyncHandler(async (req, res) => {
-  const { organizationName, name, password } = req.body;
+  const { organizationName, name, password, contactEmail, logoUrl } = req.body;
   const email = req.body.email.toLowerCase();
   const passwordHash = await bcrypt.hash(password, 12);
+  const orgName = organizationName?.trim();
 
   const { org, user } = await tx(async (t) => {
     const taken = await t.user.findUnique({ where: { email }, select: { id: true } });
     if (taken) throw new ApiError(409, 'Email already registered');
 
-    const slug = await uniqueSlug('organizations', organizationName, null, t);
+    // Player sign-up: no organization
+    if (!orgName) {
+      const user = await t.user.create({ data: { name, email, passwordHash } });
+      return { org: null, user };
+    }
+
+    const slug = await uniqueSlug('organizations', orgName, null, t);
     const org = await t.organization.create({
-      data: { name: organizationName, slug, contactEmail: email },
+      data: {
+        name: orgName,
+        slug,
+        contactEmail: contactEmail?.toLowerCase() || email,
+        logoUrl: logoUrl || null,
+      },
     });
     const user = await t.user.create({
       data: { organizationId: org.id, name, email, passwordHash, role: 'owner' },

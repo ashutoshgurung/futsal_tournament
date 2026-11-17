@@ -21,4 +21,6 @@ abstract class AuthState with _$AuthState {
   bool get isLoading => status == AuthStatus.loading;
   bool get isEmailLoading => isLoading && method == AuthMethod.email;
   bool get isGoogleLoading => isLoading && method == AuthMethod.google;
+  String? get role => session?.user?['role'] as String?;
+  bool get isOrganizer => role == 'owner' || session?.organization != null;
 }

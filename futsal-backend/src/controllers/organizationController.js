@@ -57,8 +57,3 @@ exports.get = asyncHandler(async (req, res) => {
   });
 });
 
-exports.update = asyncHandler(async (req, res) => {
-  // slug and plan are never client-editable
-  const org = await prisma.organization.update({ where: { id: req.orgId }, data: req.body });
-  res.json({ success: true, data: dto.org(org) });
-});

@@ -36,10 +36,12 @@ class _SignInScreenState extends State<SignInScreen> {
     if (bloc.state.isLoading) return;
     if (!_formKey.currentState!.validate()) return;
     FocusScope.of(context).unfocus();
-    bloc.add(AuthEvent.loginRequested(
-      email: _email.text.trim(),
-      password: _password.text,
-    ));
+    bloc.add(
+      AuthEvent.loginRequested(
+        email: _email.text.trim(),
+        password: _password.text,
+      ),
+    );
   }
 
   void _google() {
@@ -50,20 +52,34 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _openSignup() => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const SignupScreen()),
-      );
+    context,
+    MaterialPageRoute(builder: (_) => const SignupScreen()),
+  );
 
   void _openForgotPassword() => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => ForgetPasswordScreen()),
-      );
+    context,
+    MaterialPageRoute(builder: (_) => ForgetPasswordScreen()),
+  );
 
   void _onState(BuildContext context, AuthState state) {
     // SignupScreen may be pushed on top: only the visible screen reacts.
     if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
-    if (state.message != null) _showError(context, state.message!);
-    // Success needs no navigation: main.dart swaps the home screen.
+    final message = state.message;
+    if (message == null) return;
+
+    // Same hint for every failed login, so it reveals nothing about any account.
+    final isBadCredentials =
+        state.status == AuthStatus.failure &&
+        message.toLowerCase().contains('invalid email or password');
+
+    _showError(
+      context,
+      message,
+      hint: isBadCredentials
+          ? 'Signed up with Google? Use Continue with Google, or tap Forgot Password.'
+          : null,
+      onGoogle: isBadCredentials ? _google : null,
+    );
   }
 
   @override
@@ -78,7 +94,10 @@ class _SignInScreenState extends State<SignInScreen> {
         body: Stack(
           children: [
             Positioned.fill(
-              child: Image.asset('assets/images/login_image.jpg', fit: BoxFit.cover),
+              child: Image.asset(
+                'assets/images/login_image.jpg',
+                fit: BoxFit.cover,
+              ),
             ),
             Positioned.fill(
               child: Container(color: Colors.black.withValues(alpha: 0.45)),
@@ -87,7 +106,9 @@ class _SignInScreenState extends State<SignInScreen> {
               child: LayoutBuilder(
                 builder: (context, constraints) => SingleChildScrollView(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
                     child: Form(
                       key: _formKey,
                       child: Padding(
@@ -100,16 +121,22 @@ class _SignInScreenState extends State<SignInScreen> {
                             return Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Hello!',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 35,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white)),
-                                Text('Sign in to your account',
-                                    style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white)),
+                                Text(
+                                  'Hello!',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  'Sign in to your account',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
                                 const SizedBox(height: 50),
                                 IgnorePointer(
                                   ignoring: busy,
@@ -120,23 +147,30 @@ class _SignInScreenState extends State<SignInScreen> {
                                       children: [
                                         EmailInputWidget(controller: _email),
                                         const SizedBox(height: 15),
-                                        PasswordInputWidget(controller: _password),
+                                        PasswordInputWidget(
+                                          controller: _password,
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ),
                                 const SizedBox(height: 15),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
                                   child: Align(
                                     alignment: Alignment.centerRight,
                                     child: GestureDetector(
                                       onTap: busy ? null : _openForgotPassword,
-                                      child: Text('Forgot Password?',
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white)),
+                                      child: Text(
+                                        'Forgot Password?',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -156,16 +190,23 @@ class _SignInScreenState extends State<SignInScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text("Don't have an account? ",
-                                        style: GoogleFonts.poppins(
-                                            fontSize: 12, color: Colors.white70)),
+                                    Text(
+                                      "Don't have an account? ",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
                                     InkWell(
                                       onTap: busy ? null : _openSignup,
-                                      child: Text('Sign Up',
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: _kAccent)),
+                                      child: Text(
+                                        'Sign Up',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: _kAccent,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -186,14 +227,42 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 }
 
-void _showError(BuildContext context, String message) {
+void _showError(
+  BuildContext context,
+  String message, {
+  String? hint,
+  VoidCallback? onGoogle,
+}) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(
-      content: Text(message, style: GoogleFonts.poppins(fontSize: 13)),
-      backgroundColor: Colors.red.shade700,
-      behavior: SnackBarBehavior.floating,
-    ));
+    ..showSnackBar(
+      SnackBar(
+        duration: Duration(seconds: hint == null ? 4 : 7),
+        backgroundColor: Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(message, style: GoogleFonts.poppins(fontSize: 13)),
+            if (hint != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                hint,
+                style: GoogleFonts.poppins(fontSize: 11, color: Colors.white70),
+              ),
+            ],
+          ],
+        ),
+        action: onGoogle == null
+            ? null
+            : SnackBarAction(
+                label: 'GOOGLE',
+                textColor: Colors.white,
+                onPressed: onGoogle,
+              ),
+      ),
+    );
 }
 
 class _OrDivider extends StatelessWidget {
@@ -202,7 +271,9 @@ class _OrDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final line = Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.3)));
+    final line = Expanded(
+      child: Divider(color: Colors.white.withValues(alpha: 0.3)),
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -210,8 +281,10 @@ class _OrDivider extends StatelessWidget {
           line,
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(text,
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.white70)),
+            child: Text(
+              text,
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.white70),
+            ),
           ),
           line,
         ],
@@ -239,26 +312,38 @@ class _GoogleButton extends StatelessWidget {
             foregroundColor: Colors.black87,
             disabledBackgroundColor: Colors.white70,
             side: BorderSide.none,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(50),
+            ),
           ),
           child: loading
               ? const SizedBox(
                   height: 22,
                   width: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black87),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.black87,
+                  ),
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('G',
-                        style: GoogleFonts.poppins(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF4285F4))),
+                    Text(
+                      'G',
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF4285F4),
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Text('Google',
-                        style: GoogleFonts.poppins(
-                            fontSize: 14, fontWeight: FontWeight.w600)),
+                    Text(
+                      'Google',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
         ),

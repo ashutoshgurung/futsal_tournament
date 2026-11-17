@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/data/exceptions/app_exceptions.dart';
-import 'package:football_app/repository/organizer/organizer_repository.dart';
+import 'package:football_app/repository/organization/organization_repository.dart';
 import 'organizer_register_event.dart';
 import 'organizer_register_state.dart';
 
 class OrganizerRegisterBloc
     extends Bloc<OrganizerRegisterEvent, OrganizerRegisterState> {
-  final OrganizerRepository _repository;
+  final OrganizationRepository _repository;
 
   OrganizerRegisterBloc(this._repository)
     : super(const OrganizerRegisterState()) {

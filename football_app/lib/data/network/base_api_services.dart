@@ -3,4 +3,9 @@ abstract class BaseApiServices {
   Future<dynamic> postAPi(String url, var data, {String? token});
   Future<dynamic> putApi(String url, var data, {String? token});
   Future<dynamic> deleteApi(String url, {String? token});
+  Future<dynamic> putMultipart(
+    String url, {
+    required String field,
+    required String filePath,
+  });
 }

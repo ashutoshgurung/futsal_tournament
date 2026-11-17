@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:football_app/bloc/auth/auth_bloc.dart';
+import 'package:football_app/bloc/auth/auth_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_bloc.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_state.dart';
-import 'package:football_app/repository/organizer/organizer_repository.dart';
+import 'package:football_app/repository/organization/organization_repository.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 
 /// Provides the bloc. Navigate to this one.
@@ -13,7 +16,8 @@ class BecomeOrganizerScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (ctx) => OrganizerRegisterBloc(ctx.read<OrganizerRepository>()),
+      create: (ctx) =>
+          OrganizerRegisterBloc(ctx.read<OrganizationRepository>()),
       child: const _BecomeOrganizerView(),
     );
   }
@@ -133,47 +137,6 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
     );
   }
 
-  Future<void> _showSuccessDialog() {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.green),
-            const SizedBox(width: 8),
-            Text(
-              'Organizer Created',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Your organization is ready. You can now log in with your email and password.',
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(
-              'OK',
-              style: GoogleFonts.poppins(
-                color: Colors.green,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _submit() {
     FocusScope.of(context).unfocus();
 
@@ -203,13 +166,15 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
 
     return BlocConsumer<OrganizerRegisterBloc, OrganizerRegisterState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
-      listener: (context, state) async {
+      listener: (context, state) {
         if (state.status == RegisterStatus.failure) {
           _showError(state.errorMessage ?? 'Something went wrong');
         } else if (state.status == RegisterStatus.success) {
-          await _showSuccessDialog();
-          if (!mounted) return;
-          Navigator.pop(this.context);
+          // Token is already saved by the repository.
+          final authBloc = this.context.read<AuthBloc>(); // read before popping
+          Navigator.of(this.context).popUntil((r) => r.isFirst);
+          // Restores the session; SplashAuthWrapper then shows the dashboard.
+          authBloc.add(const AuthEvent.appStarted());
         }
       },
       builder: (context, state) {
@@ -415,7 +380,7 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
                         if (v == null || v.isEmpty) {
                           return 'Please enter a password';
                         }
-                        if (v.length < 6) return 'At least 6 characters';
+                        if (v.length < 8) return 'At least 8 characters';
                         return null;
                       },
                     ),

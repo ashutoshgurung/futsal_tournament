@@ -14,7 +14,7 @@ import 'package:football_app/data/storage/token_storage.dart';
 
 import 'package:football_app/repository/auth/auth_repository.dart';
 import 'package:football_app/repository/auth/auth_repository_impl.dart';
-import 'package:football_app/repository/organizer/organizer_repository.dart';
+import 'package:football_app/repository/organization/organization_repository.dart';
 import 'package:football_app/repository/tournament/tournament_api_repository.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
 
@@ -75,9 +75,11 @@ class MyApp extends StatelessWidget {
               TournamentApiRepository(context.read<BaseApiServices>()),
         ),
 
-        RepositoryProvider<OrganizerRepository>(
-          create: (context) =>
-              OrganizerRepository(context.read<BaseApiServices>()),
+        RepositoryProvider<OrganizationRepository>(
+          create: (context) => OrganizationRepository(
+            context.read<BaseApiServices>(),
+            context.read<TokenStorage>(),
+          ),
         ),
       ],
 

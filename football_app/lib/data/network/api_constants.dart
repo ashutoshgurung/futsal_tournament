@@ -10,18 +10,21 @@ class ApiConstants {
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
     if (kIsWeb) return 'http://localhost:$_port';
-    if (Platform.isAndroid) return 'http://10.0.2.2:$_port'; // Android emulator -> your Mac
+    if (Platform.isAndroid) {
+      return 'http://192.168.1.121:$_port'; // Android emulator -> your Mac
+    }
     return 'http://localhost:$_port'; // iOS simulator, macOS
   }
 
   // Endpoints (getters, because baseUrl is no longer a compile-time constant)
   static String get login => '$baseUrl/api/auth/login';
   static String get register => '$baseUrl/api/auth/register';
-  static String get organizerRegister => '$baseUrl/api/organizers/register';
+  static String get organizerRegister => '$baseUrl/api/auth/register';
   static String get publicTournaments => '$baseUrl/api/public/tournaments';
-  static String get me => '$baseUrl/api/auth/me'; // TODO: use your real protected endpoint
+  static String get me => '$baseUrl/api/auth/me';
   static String get google => '$baseUrl/api/auth/google';
   static String get changePassword => '$baseUrl/api/auth/password';
+  static String get organization => '$baseUrl/api/organization';
 
   static const Duration timeout = Duration(seconds: 20);
 
