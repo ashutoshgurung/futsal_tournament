@@ -19,24 +19,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   AuthState _loading(AuthMethod m) => state.copyWith(
-        status: AuthStatus.loading,
-        method: m,
-        message: null, // clear any stale error
-      );
+    status: AuthStatus.loading,
+    method: m,
+    message: null, // clear any stale error
+  );
 
   AuthState _success(AuthResponseModel? s) => state.copyWith(
-        status: AuthStatus.success,
-        method: null,
-        session: s,
-        message: 'Logged in successfully.',
-      );
+    status: AuthStatus.success,
+    method: null,
+    session: s,
+    message: 'Logged in successfully.',
+  );
 
   AuthState _failure(Object e) => state.copyWith(
-        status: AuthStatus.failure,
-        method: null,
-        session: null,
-        message: errorMessage(e),
-      );
+    status: AuthStatus.failure,
+    method: null,
+    session: null,
+    message: errorMessage(e),
+  );
+  AuthState get _registered => state.copyWith(
+    status: AuthStatus.registered,
+    method: null,
+    session: null,
+    message: 'Account created. Please sign in.',
+  );
 
   // Full reset with no message, so a plain logged-out state never shows a snackbar.
   AuthState get _loggedOut =>
@@ -64,18 +70,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onRegister(RegisterRequested e, Emitter<AuthState> emit) async {
     emit(_loading(AuthMethod.email));
     try {
-      emit(_success(await _repo.register(
+      await _repo.register(
         name: e.name.trim(),
         email: e.email.trim(),
         password: e.password,
-      )));
+      );
+      emit(_registered);
     } catch (err) {
       emit(_failure(err));
     }
   }
 
   Future<void> _onGoogle(
-      GoogleSignInRequested e, Emitter<AuthState> emit) async {
+    GoogleSignInRequested e,
+    Emitter<AuthState> emit,
+  ) async {
     emit(_loading(AuthMethod.google));
     try {
       final credential = await _repo.getGoogleCredential();
@@ -99,12 +108,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSessionExpired(
-      SessionExpired e, Emitter<AuthState> emit) async {
+    SessionExpired e,
+    Emitter<AuthState> emit,
+  ) async {
     try {
       await _repo.logout();
     } catch (err) {
       debugPrint('logout failed: $err');
     }
-    emit(_loggedOut.copyWith(message: 'Session expired. Please sign in again.'));
+    emit(
+      _loggedOut.copyWith(message: 'Session expired. Please sign in again.'),
+    );
   }
 }

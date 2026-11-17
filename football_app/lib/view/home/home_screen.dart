@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_event.dart';
+import 'package:football_app/config/routes/route_names.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
-import 'package:football_app/view/becomeorganizer/become_organizer_screen.dart';
 import 'package:football_app/view/home/widgets/drawer_widget.dart';
-
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
 import 'package:football_app/view/home/widgets/tournament_list.dart';
-import 'package:football_app/view/my_registration/my_registration_screen.dart';
-import 'package:football_app/view/profile/profile_screen.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -43,24 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.black,
         drawer: AppDrawer(
           onTournamentsTap: widget.onViewAllTournaments,
-          onProfileTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => ProfileScreen()),
-            );
-          },
-          onMyRegistrationTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => MyRegistrationScreen()),
-            );
-          },
-          onBecomeOrganizerTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => BecomeOrganizerScreen()),
-            );
-          },
+          onProfileTap: () => context.push(RouteNames.profile),
+          onMyRegistrationTap: () => context.push(RouteNames.myRegistration),
+          onBecomeOrganizerTap: () => context.push(RouteNames.becomeOrganizer),
         ),
         body: SafeArea(
           child: SingleChildScrollView(

@@ -46,7 +46,8 @@ class _SplashAuthWrapperState extends State<SplashAuthWrapper> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state.status != AuthStatus.initial &&
+        if (!_authFinished &&
+            state.status != AuthStatus.initial &&
             state.status != AuthStatus.loading) {
           setState(() => _authFinished = true);
         }
@@ -72,6 +73,7 @@ class _SplashAuthWrapperState extends State<SplashAuthWrapper> {
           case AuthStatus.failure:
           case AuthStatus.loading:
           case AuthStatus.initial:
+          case AuthStatus.registered: // account created, not logged in -> Sign In
             screen = const KeyedSubtree(
               key: ValueKey('signin'),
               child: SignInScreen(),

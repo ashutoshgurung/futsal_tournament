@@ -3,7 +3,14 @@ import 'package:football_app/model/auth_response/auth_response_model.dart';
 
 part 'auth_state.freezed.dart';
 
-enum AuthStatus { initial, unauthenticated, loading, success, failure }
+enum AuthStatus {
+  initial,
+  unauthenticated,
+  loading,
+  success,
+  failure,
+  registered,
+}
 
 enum AuthMethod { email, google }
 

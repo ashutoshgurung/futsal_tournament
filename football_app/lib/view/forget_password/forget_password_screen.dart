@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:football_app/view/forget_password/forget_password_instruction_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:football_app/config/routes/route_names.dart';
 import 'package:football_app/view/forget_password/widgets/f_email_input_widget.dart';
 import 'package:football_app/view/forget_password/widgets/f_send_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,11 +39,8 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
-
                 Image.asset("assets/icons/lock.png", height: 100, width: 100),
-
                 const SizedBox(height: 20),
-
                 Text(
                   "Forget your password?",
                   style: GoogleFonts.poppins(
@@ -51,17 +49,13 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 Text(
                   "Enter your registered email below to receive",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey),
                 ),
-
                 const SizedBox(height: 5),
-
                 Text(
                   "password reset instruction",
                   textAlign: TextAlign.center,
@@ -71,16 +65,9 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                 const FEmailInputWidget(),
                 const SizedBox(height: 25),
                 FSendWidget(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ForgetPasswordInstructionScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: () => context.push(RouteNames.forgotPasswordSent),
                 ),
-                Spacer(),
+                const Spacer(),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                   child: Row(
@@ -93,12 +80,15 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                           color: Colors.white,
                         ),
                       ),
-                      Text(
-                        " Sign in",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: const Color(0xFFB7F34A),
-                          fontWeight: FontWeight.bold,
+                      GestureDetector(
+                        onTap: () => context.pop(),
+                        child: Text(
+                          " Sign in",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: const Color(0xFFB7F34A),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],

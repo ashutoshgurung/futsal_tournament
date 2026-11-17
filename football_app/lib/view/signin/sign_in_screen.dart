@@ -3,11 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/auth/auth_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
 import 'package:football_app/bloc/auth/auth_state.dart';
+import 'package:football_app/config/routes/route_names.dart';
 import 'package:football_app/view/signin/widgets/email_input_widget.dart';
 import 'package:football_app/view/signin/widgets/login_button_widget.dart';
 import 'package:football_app/view/signin/widgets/password_input_widget.dart';
 import 'package:football_app/view/forget_password/forget_password_screen.dart';
 import 'package:football_app/view/signup/signup_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const _kAccent = Color(0xFFB7F34A);
@@ -51,16 +53,8 @@ class _SignInScreenState extends State<SignInScreen> {
     bloc.add(const AuthEvent.googleSignInRequested());
   }
 
-  void _openSignup() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => const SignupScreen()),
-  );
-
-  void _openForgotPassword() => Navigator.push(
-    context,
-    MaterialPageRoute(builder: (_) => ForgetPasswordScreen()),
-  );
-
+  void _openSignup() => context.push(RouteNames.signUp);
+  void _openForgotPassword() => context.push(RouteNames.forgotPassword);
   void _onState(BuildContext context, AuthState state) {
     // SignupScreen may be pushed on top: only the visible screen reacts.
     if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;

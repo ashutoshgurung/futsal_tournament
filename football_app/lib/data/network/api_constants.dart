@@ -11,7 +11,7 @@ class ApiConstants {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
     if (kIsWeb) return 'http://localhost:$_port';
     if (Platform.isAndroid) {
-      return 'http://192.168.1.121:$_port'; // Android emulator -> your Mac
+      return 'http://192.168.1.144:$_port'; // Android emulator -> your Mac
     }
     return 'http://localhost:$_port'; // iOS simulator, macOS
   }

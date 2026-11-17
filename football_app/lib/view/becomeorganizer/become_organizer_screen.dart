@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:football_app/bloc/auth/auth_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_bloc.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_state.dart';
+import 'package:football_app/config/routes/route_names.dart';
 import 'package:football_app/repository/organization/organization_repository.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -171,10 +173,9 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
           _showError(state.errorMessage ?? 'Something went wrong');
         } else if (state.status == RegisterStatus.success) {
           // Token is already saved by the repository.
-          final authBloc = this.context.read<AuthBloc>(); // read before popping
-          Navigator.of(this.context).popUntil((r) => r.isFirst);
-          // Restores the session; SplashAuthWrapper then shows the dashboard.
-          authBloc.add(const AuthEvent.appStarted());
+          this.context.read<AuthBloc>().add(const AuthEvent.appStarted());
+          // The router redirect forwards organizers to /organizer.
+          this.context.go(RouteNames.home);
         }
       },
       builder: (context, state) {
