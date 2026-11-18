@@ -15,7 +15,7 @@ const sendVerification = async (user) => {
     data: {
       userId: user.id,
       tokenHash: hashToken(token),
-      expiresAt: new Date(Date.now() + TTL_MS),
+      expiresAt: new Date(Date.now() + TTL_MS), 
     },
   });
 
@@ -30,6 +30,6 @@ const sendVerification = async (user) => {
 
 // Never let a mail failure break signup; the user can request a resend.
 const trySendVerification = (user) =>
-  sendVerification(user).catch((err) => console.error('Verification email failed:', err.message));
+  sendVerification(user).catch((err) => console.error('Verification email failed:', err));
 
 module.exports = { hashToken, sendVerification, trySendVerification };
