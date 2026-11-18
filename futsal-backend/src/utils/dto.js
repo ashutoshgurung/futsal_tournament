@@ -1,6 +1,10 @@
 // Shapes DB rows into API responses (never leaks password_hash, nests grouped columns)
+// exports.user = (u) => ({
+//   id: u.id, name: u.name, email: u.email, role: u.role, isActive: u.isActive, createdAt: u.createdAt,
+// });
 exports.user = (u) => ({
-  id: u.id, name: u.name, email: u.email, role: u.role, isActive: u.isActive, createdAt: u.createdAt,
+  id: u.id, name: u.name, email: u.email, role: u.role, isActive: u.isActive,
+  emailVerified: u.emailVerified, avatarUrl: u.avatarUrl ?? null, createdAt: u.createdAt,
 });
 
 exports.org = (o) => ({

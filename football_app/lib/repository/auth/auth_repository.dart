@@ -7,16 +7,26 @@ abstract class AuthRepository {
 
   Future<AuthResponseModel> login(String email, String password);
 
-  Future<void> register({
+  /// Creates the account. The backend sends a verification email and returns
+  /// no token, so the user must verify and then sign in.
+  /// Returns the backend's message (may be null).
+  Future<String?> register({
     required String name,
     required String email,
     required String password,
   });
 
+  /// Asks the backend to send a new verification email.
+  /// Returns the backend's message (same text whether or not the account exists).
+  Future<String?> resendVerification(String email);
+
   /// Opens the Google account picker. Returns the ID token, or null if cancelled.
   Future<String?> getGoogleCredential();
 
-  Future<AuthResponseModel> loginWithGoogle(String credential);
+  Future<AuthResponseModel> loginWithGoogle(
+    String credential, {
+    String? organizationName,
+  });
 
   Future<void> changePassword(String currentPassword, String newPassword);
 

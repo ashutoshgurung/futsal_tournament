@@ -34,8 +34,10 @@ class NetworkApiServices implements BaseApiServices {
   bool _isPublic(String url) =>
       url == ApiConstants.login ||
       url == ApiConstants.register ||
-      url == ApiConstants.organizerRegister || // added
+      url == ApiConstants.organizerRegister ||
       url == ApiConstants.google ||
+      url == ApiConstants.resendVerification ||
+      url == ApiConstants.verifyEmail ||
       url.startsWith(ApiConstants.publicTournaments);
 
   @override
@@ -140,8 +142,9 @@ class NetworkApiServices implements BaseApiServices {
     if (body is Map && body['code'] == 'ORGANIZATION_REQUIRED') {
       throw OrganizationRequiredException(
         msg ?? 'Organization name is required',
-        profileName:
-            (body['profile'] is Map) ? body['profile']['name'] as String? : null,
+        profileName: (body['profile'] is Map)
+            ? body['profile']['name'] as String?
+            : null,
       );
     }
 
@@ -177,7 +180,8 @@ class NetworkApiServices implements BaseApiServices {
 
   String? _errorMessage(http.Response response) {
     final body = _tryDecode(response.body);
-    if (body is Map && body['message'] is String) return body['message'] as String;
+    if (body is Map && body['message'] is String)
+      return body['message'] as String;
     return null;
   }
 }

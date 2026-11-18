@@ -4,11 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 class TermsCheckbox extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
+  final String? errorText;
 
   const TermsCheckbox({
     super.key,
     required this.value,
     required this.onChanged,
+    this.errorText,
   });
 
   @override
@@ -36,6 +38,17 @@ class TermsCheckbox extends StatelessWidget {
               ),
             ),
           ),
+          if (errorText != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 14.0),
+              child: Text(
+                errorText!,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: Colors.redAccent,
+                ),
+              ),
+            ),
         ],
       ),
     );

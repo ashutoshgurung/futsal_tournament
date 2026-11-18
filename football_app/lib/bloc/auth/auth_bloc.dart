@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
@@ -8,16 +9,14 @@ import 'package:football_app/repository/auth/auth_repository.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _repo;
-
   AuthBloc(this._repo) : super(const AuthState()) {
     on<AppStarted>(_onAppStarted);
-    on<LoginRequested>(_onLogin);
-    on<RegisterRequested>(_onRegister);
-    on<GoogleSignInRequested>(_onGoogle);
+    on<LoginRequested>(_onLogin, transformer: droppable());
+    on<RegisterRequested>(_onRegister, transformer: droppable());
+    on<GoogleSignInRequested>(_onGoogle, transformer: droppable());
     on<LogoutRequested>(_onLogout);
     on<SessionExpired>(_onSessionExpired);
   }
-
   AuthState _loading(AuthMethod m) => state.copyWith(
     status: AuthStatus.loading,
     method: m,
@@ -37,11 +36,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     session: null,
     message: errorMessage(e),
   );
-  AuthState get _registered => state.copyWith(
+  AuthState _registered(String? message) => state.copyWith(
     status: AuthStatus.registered,
     method: null,
     session: null,
-    message: 'Account created. Please sign in.',
+    message:
+        message ?? 'Account created. Check your email to verify your address.',
   );
 
   // Full reset with no message, so a plain logged-out state never shows a snackbar.
@@ -70,12 +70,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onRegister(RegisterRequested e, Emitter<AuthState> emit) async {
     emit(_loading(AuthMethod.email));
     try {
-      await _repo.register(
+      final msg = await _repo.register(
         name: e.name.trim(),
         email: e.email.trim(),
         password: e.password,
       );
-      emit(_registered);
+      emit(_registered(msg));
     } catch (err) {
       emit(_failure(err));
     }

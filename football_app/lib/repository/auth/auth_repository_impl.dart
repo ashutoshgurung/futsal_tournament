@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:football_app/data/exceptions/app_exceptions.dart';
 import 'package:football_app/data/network/api_constants.dart';
 import 'package:football_app/data/network/base_api_services.dart';
@@ -6,12 +7,17 @@ import 'package:football_app/data/storage/token_storage.dart';
 import 'package:football_app/model/auth_response/auth_response_model.dart';
 import 'package:football_app/repository/auth/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final BaseApiServices _api;
   final TokenStorage _storage;
   AuthRepositoryImpl(this._api, this._storage);
+
+  /// Debug-only logging. Nothing is printed in release builds, and no
+  /// personal data (email, token) is ever logged.
+  void _log(String message) {
+    if (kDebugMode) debugPrint('[GoogleAuth] $message');
+  }
 
   Future<void>? _googleInit;
   Future<void> _ensureGoogle() {
@@ -25,10 +31,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   Future<AuthResponseModel> _persist(dynamic res) async {
     final map = res as Map<String, dynamic>;
-    // NOTE: assumes TokenStorage has saveToken(String). Rename if yours differs.
     await _storage.saveToken(map['token'] as String);
     return AuthResponseModel.fromJson(map);
   }
+
+  String? _messageOf(dynamic res) =>
+      res is Map ? res['message'] as String? : null;
 
   @override
   Future<({bool loggedIn, AuthResponseModel? session})> restoreSession() async {
@@ -66,63 +74,57 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> register({
+  Future<String?> register({
     required String name,
     required String email,
     required String password,
   }) async {
-    await _api.postAPi(ApiConstants.register, {
+    final res = await _api.postAPi(ApiConstants.register, {
       'name': name.trim(),
       'email': email.trim().toLowerCase(),
       'password': password,
     });
-    // Intentionally no _persist: the user must sign in after registering.
+    // Intentionally no _persist: the user must verify their email, then sign in.
+    return _messageOf(res);
+  }
+
+  @override
+  Future<String?> resendVerification(String email) async {
+    final res = await _api.postAPi(ApiConstants.resendVerification, {
+      'email': email.trim().toLowerCase(),
+    });
+    return _messageOf(res);
   }
 
   @override
   Future<String?> getGoogleCredential() async {
-    debugPrint('[GoogleAuth] getGoogleCredential() start');
+    _log('start');
     try {
       await _ensureGoogle();
-
-      debugPrint(
-        '[GoogleAuth] supportsAuthenticate=${GoogleSignIn.instance.supportsAuthenticate()}',
-      );
-      debugPrint('[GoogleAuth] calling authenticate()...');
+      _log('supportsAuthenticate=${GoogleSignIn.instance.supportsAuthenticate()}');
 
       final account = await GoogleSignIn.instance.authenticate();
-      debugPrint(
-        '[GoogleAuth] account id=${account.id} email=${account.email}',
-      );
-
       final idToken = account.authentication.idToken;
-      debugPrint(
-        '[GoogleAuth] idToken null? ${idToken == null}, length=${idToken?.length}',
-      );
+      _log('idToken received: ${idToken != null}');
 
       if (idToken == null) {
         throw BadRequestException('Google did not return an ID token');
       }
       return idToken;
     } on GoogleSignInException catch (e, st) {
-      debugPrint('[GoogleAuth] GoogleSignInException');
-      debugPrint('  code:        ${e.code}');
-      debugPrint('  description: ${e.description}');
-      debugPrint('  details:     ${e.details}');
-      debugPrintStack(stackTrace: st, maxFrames: 8);
+      _log('GoogleSignInException code=${e.code} description=${e.description}');
+      if (kDebugMode) debugPrintStack(stackTrace: st, maxFrames: 8);
 
       if (e.code == GoogleSignInExceptionCode.canceled) {
-        debugPrint(
-          '[GoogleAuth] canceled (picker dismissed, or no eligible account / config issue)',
-        );
+        // Picker dismissed, or no eligible account / config issue.
         return null;
       }
       throw BadRequestException(
         'Google sign-in failed: ${e.description ?? e.code.name}',
       );
     } catch (e, st) {
-      debugPrint('[GoogleAuth] Unexpected error: ${e.runtimeType}: $e');
-      debugPrintStack(stackTrace: st, maxFrames: 8);
+      _log('Unexpected error: ${e.runtimeType}');
+      if (kDebugMode) debugPrintStack(stackTrace: st, maxFrames: 8);
       rethrow;
     }
   }
