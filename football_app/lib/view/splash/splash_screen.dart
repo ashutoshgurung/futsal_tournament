@@ -72,8 +72,8 @@ class _DustPainter extends CustomPainter {
         final r = (3 + layer * 1.5 + 6 * t) * s;
 
         final paint = Paint()
-          ..color = Colors.white.withOpacity(
-            0.35 * fade * (0.5 + 0.5 * impact.strength),
+          ..color = Colors.white.withValues(
+            alpha: 0.35 * fade * (0.5 + 0.5 * impact.strength),
           )
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
@@ -154,7 +154,7 @@ class _SplashScreenState extends State<SplashScreen>
         letterSpacing: 3,
         shadows: shadows
             ? [
-                Shadow(color: Colors.white.withOpacity(0.35), blurRadius: 14),
+                Shadow(color: Colors.white.withValues(alpha: 0.35), blurRadius: 14),
                 const Shadow(
                   color: Colors.black54,
                   offset: Offset(0, 3),
@@ -345,9 +345,9 @@ class _SplashScreenState extends State<SplashScreen>
           shape: BoxShape.circle,
           gradient: RadialGradient(
             colors: [
-              Colors.white.withOpacity(o),
-              Colors.white.withOpacity(o * 0.45),
-              Colors.white.withOpacity(0),
+              Colors.white.withValues(alpha: o),
+              Colors.white.withValues(alpha: o * 0.45),
+              Colors.white.withValues(alpha: 0),
             ],
             stops: const [0.0, 0.55, 1.0],
           ),
@@ -554,9 +554,9 @@ class _SplashScreenState extends State<SplashScreen>
       begin: const Alignment(-1, -0.4),
       end: const Alignment(1, 0.4),
       colors: [
-        Colors.white.withOpacity(0),
-        Colors.white.withOpacity(0.9),
-        Colors.white.withOpacity(0),
+        Colors.white.withValues(alpha: 0),
+        Colors.white.withValues(alpha: 0.9),
+        Colors.white.withValues(alpha: 0),
       ],
       stops: [
         _clamp01(center - 0.1),
@@ -613,9 +613,9 @@ class _SplashScreenState extends State<SplashScreen>
             gradient: RadialGradient(
               radius: 0.75,
               colors: [
-                _accent.withOpacity(a),
-                _accent.withOpacity(a * 0.35),
-                _accent.withOpacity(0),
+                _accent.withValues(alpha: a),
+                _accent.withValues(alpha: a * 0.35),
+                _accent.withValues(alpha: 0),
               ],
               stops: const [0.0, 0.45, 1.0],
             ),

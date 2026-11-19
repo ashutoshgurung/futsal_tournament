@@ -118,7 +118,7 @@ class AppRouter {
   static const _protectedRoutes = {
     RouteNames.profile,
     RouteNames.myRegistration,
-
+    RouteNames.becomeOrganizer,
     RouteNames.organizer,
   };
 
@@ -130,51 +130,6 @@ class AppRouter {
     RouteNames.forgotPasswordSent,
   };
 
-  // String? _redirect(BuildContext context, GoRouterState state) {
-  //   final auth = authBloc.state;
-  //   final loc = state.matchedLocation;
-
-  //   if (!_authResolved &&
-  //       auth.status != AuthStatus.initial &&
-  //       auth.status != AuthStatus.loading) {
-  //     _authResolved = true;
-  //   }
-
-  //   // Stay on splash until animation AND first auth check are done.
-  //   if (!animationDone.value || !_authResolved) {
-  //     return loc == RouteNames.splash ? null : RouteNames.splash;
-  //   }
-
-  //   // Login in progress: don't move anyone.
-  //   if (auth.status == AuthStatus.loading) return null;
-
-  //   final loggedIn = auth.status == AuthStatus.success;
-  //   final isOrganizer = loggedIn && auth.session?.organization != null;
-  //   final landing = isOrganizer ? RouteNames.organizer : RouteNames.home;
-
-  //   // ---- Guest ----
-  //   if (!loggedIn) {
-  //     if (loc == RouteNames.splash) return RouteNames.home; // guests go to home
-  //     if (_protectedRoutes.contains(loc)) return RouteNames.signIn;
-  //     return null; // home, sign in, sign up, etc. are all fine
-  //   }
-
-  //   // ---- Logged in ----
-  //   // Logged in: only bounce away from pages that can't pop back.
-  //   if (loc == RouteNames.signUp ||
-  //       loc == RouteNames.forgotPassword ||
-  //       loc == RouteNames.forgotPasswordSent) {
-  //     return landing;
-  //   }
-  //   // Sign-in pages: leave them. Do NOT redirect when something can pop back
-  //   // (see section 3), so the user returns to where they were.
-  //   if (_authRoutes.contains(loc)) return landing;
-
-  //   if (isOrganizer && loc == RouteNames.home) return RouteNames.organizer;
-  //   if (!isOrganizer && loc == RouteNames.organizer) return RouteNames.home;
-  //   return null;
-  // }
-
   String? _redirect(BuildContext context, GoRouterState state) {
     final auth = authBloc.state;
     final loc = state.matchedLocation;
@@ -185,36 +140,31 @@ class AppRouter {
       _authResolved = true;
     }
 
-    // Splash: animation ra first auth check duitai sakiyesamma.
+    // Stay on splash until animation AND first auth check are done.
     if (!animationDone.value || !_authResolved) {
       return loc == RouteNames.splash ? null : RouteNames.splash;
     }
 
-    // Login huda kasailai nasarau.
+    // Login in progress: don't move anyone.
     if (auth.status == AuthStatus.loading) return null;
 
     final loggedIn = auth.status == AuthStatus.success;
     final isOrganizer = loggedIn && auth.session?.organization != null;
     final landing = isOrganizer ? RouteNames.organizer : RouteNames.home;
 
+    // Leave splash for everyone once both checks are done.
+    if (loc == RouteNames.splash) return landing;
+
     // ---- Guest ----
     if (!loggedIn) {
-      if (loc == RouteNames.splash) return RouteNames.home;
       if (_protectedRoutes.contains(loc)) return RouteNames.signIn;
       return null;
     }
+    // ---- Logged in ---- (rest unchanged)
 
     // ---- Logged in ----
-    if (loc == RouteNames.splash ||
-        loc == RouteNames.signUp ||
-        loc == RouteNames.forgotPassword ||
-        loc == RouteNames.forgotPasswordSent) {
-      return landing;
-    }
-    if (isOrganizer &&
-        (loc == RouteNames.home || loc == RouteNames.becomeOrganizer)) {
-      return RouteNames.organizer;
-    }
+    if (_authRoutes.contains(loc)) return landing;
+    if (isOrganizer && loc == RouteNames.home) return RouteNames.organizer;
     if (!isOrganizer && loc == RouteNames.organizer) return RouteNames.home;
     return null;
   }
