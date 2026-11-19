@@ -88,13 +88,15 @@ class _SignInScreenState extends State<SignInScreen> {
       // Lets the OS / password manager offer to save the credentials.
       TextInput.finishAutofillContext();
 
-      if (context.canPop()) {
-        // Opened from another screen (guest flow): go back to where the
-        // user was, e.g. the tournament they wanted to book.
+      if (state.isOrganizer) {
+        // Organizer: clear the stack and open the dashboard.
+        context.go(RouteNames.organizer);
+      } else if (context.canPop()) {
+        // Opened from another screen (guest tapped Book / Profile etc.):
+        // go back to where the user was so they can continue.
         context.pop(true);
       } else {
-        // Opened directly (e.g. after logout): go home. The router sends
-        // organizers on to their dashboard.
+        // Opened directly (e.g. after logout): go home.
         context.go(RouteNames.home);
       }
       return;

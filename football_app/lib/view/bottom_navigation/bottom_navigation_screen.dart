@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/my_registration/my_registration_bloc.dart';
 import 'package:football_app/repository/my_registration/my_registration_repository.dart';
+import 'package:football_app/view/guest_gate/guest_gate_screen.dart';
 import 'package:football_app/view/home/home_screen.dart';
-import 'package:football_app/view/profile/profile_screen.dart';
 import 'package:football_app/view/my_registration/my_registration_screen.dart';
+import 'package:football_app/view/profile/profile_screen.dart';
 import 'package:football_app/view/tournament/tournament_screen.dart';
 import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 
@@ -47,12 +48,15 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
         ),
       ),
       PersistentTabConfig(
-        screen: RepositoryProvider(
-          create: (context) => MyRegistrationRepository(),
-          child: BlocProvider(
-            create: (context) =>
-                MyRegistrationBloc(context.read<MyRegistrationRepository>()),
-            child: const MyRegistrationScreen(),
+        screen: GuestGate(
+          message: 'Sign in to see your registrations',
+          child: RepositoryProvider(
+            create: (context) => MyRegistrationRepository(),
+            child: BlocProvider(
+              create: (context) =>
+                  MyRegistrationBloc(context.read<MyRegistrationRepository>()),
+              child: const MyRegistrationScreen(),
+            ),
           ),
         ),
         item: ItemConfig(
@@ -63,7 +67,10 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
         ),
       ),
       PersistentTabConfig(
-        screen: ProfileScreen(),
+        screen: GuestGate(
+          message: 'Sign in to view your profile',
+          child: ProfileScreen(),
+        ),
         item: ItemConfig(
           icon: const Icon(Icons.person_outline),
           title: "Profile",

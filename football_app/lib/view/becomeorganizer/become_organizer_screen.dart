@@ -141,10 +141,12 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
 
   void _submit() {
     FocusScope.of(context).unfocus();
+    final bloc = context.read<OrganizerRegisterBloc>();
+
+    // Pahilei request chaldai chha bhane feri nagara.
+    if (bloc.state.status == RegisterStatus.loading) return;
 
     if (!_formKey.currentState!.validate()) return;
-
-    final bloc = context.read<OrganizerRegisterBloc>();
     if (!bloc.state.agreed) {
       _showError('Please accept the terms to continue');
       return;
@@ -175,7 +177,7 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
           // Token is already saved by the repository.
           this.context.read<AuthBloc>().add(const AuthEvent.appStarted());
           // The router redirect forwards organizers to /organizer.
-          this.context.go(RouteNames.organizer);
+          // this.context.go(RouteNames.organizer);
         }
       },
       builder: (context, state) {
