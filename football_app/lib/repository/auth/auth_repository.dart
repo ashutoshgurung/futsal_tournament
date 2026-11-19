@@ -30,7 +30,8 @@ abstract class AuthRepository {
 
   Future<void> changePassword(String currentPassword, String newPassword);
 
-  Future<void> logout();
+  Future<void> logout();        // user-initiated: server + local
+Future<void> clearSession();  // local only (session expired)
 
   Future<void> verifySessionInBackground();
   Future<String?> getSavedToken();

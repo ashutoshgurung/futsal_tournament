@@ -81,6 +81,8 @@ class ApiConstants {
   static String get resendVerification =>
       '$baseUrl/api/auth/resend-verification';
 
+  static final String logout = '$baseUrl/api/auth/logout';
+
   // 250s hides problems: a bad IP just hangs. Fail fast instead.
   static const Duration timeout = Duration(seconds: 20);
 

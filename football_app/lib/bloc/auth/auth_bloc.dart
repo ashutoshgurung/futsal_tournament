@@ -50,6 +50,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAppStarted(AppStarted e, Emitter<AuthState> emit) async {
     try {
+      
       final r = await _repo.restoreSession();
       emit(r.loggedIn ? _success(r.session) : _loggedOut);
     } catch (err) {
@@ -57,6 +58,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(_loggedOut);
     }
   }
+  @override
+void onChange(Change<AuthState> change) {
+  super.onChange(change);
+}
 
   Future<void> _onLogin(LoginRequested e, Emitter<AuthState> emit) async {
     emit(_loading(AuthMethod.email));
@@ -99,6 +104,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onLogout(LogoutRequested e, Emitter<AuthState> emit) async {
+ 
     try {
       await _repo.logout();
     } catch (err) {
@@ -108,16 +114,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSessionExpired(
-    SessionExpired e,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      await _repo.logout();
-    } catch (err) {
-      debugPrint('logout failed: $err');
-    }
-    emit(
-      _loggedOut.copyWith(message: 'Session expired. Please sign in again.'),
-    );
+  SessionExpired e,
+  Emitter<AuthState> emit,
+) async {
+  debugPrint('BLOC: sessionExpired');
+  try {
+    await _repo.clearSession(); // local only, no server call
+  } catch (err) {
+    debugPrint('clearSession failed: $err');
   }
+  emit(_loggedOut.copyWith(message: 'Session expired. Please sign in again.'));
+}
 }
