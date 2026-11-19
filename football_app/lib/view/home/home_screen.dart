@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_bloc.dart';
 import 'package:football_app/bloc/tournament/tournament_event.dart';
+import 'package:football_app/config/components/require_login/require_login_screen.dart';
 import 'package:football_app/config/routes/route_names.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
+
 import 'package:football_app/view/home/widgets/drawer_widget.dart';
 import 'package:football_app/view/home/widgets/promo_carousel.dart';
 import 'package:football_app/view/home/widgets/search_textfield_home_widget.dart';
@@ -29,6 +31,14 @@ class _HomeScreenState extends State<HomeScreen> {
     'assets/images/futsal3.png',
   ];
 
+  /// Opens [route] only if the user is logged in. Guests are sent to
+  /// Sign In first, then continue to [route] after a successful login.
+  Future<void> _openProtected(String route) async {
+    if (await requireLogin(context) && mounted) {
+      context.push(route);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -40,9 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.black,
         drawer: AppDrawer(
           onTournamentsTap: widget.onViewAllTournaments,
-          onProfileTap: () => context.push(RouteNames.profile),
-          onMyRegistrationTap: () => context.push(RouteNames.myRegistration),
-          onBecomeOrganizerTap: () => context.push(RouteNames.becomeOrganizer),
+          onProfileTap: () => _openProtected(RouteNames.profile),
+          onMyRegistrationTap: () => _openProtected(RouteNames.myRegistration),
+          onBecomeOrganizerTap: () =>
+              _openProtected(RouteNames.becomeOrganizer),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -69,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 35,
                             fit: BoxFit.contain,
                           ),
-                          SizedBox(height: 30),
+                          const SizedBox(height: 30),
                         ],
                       ),
                       Row(
@@ -82,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () => _openProtected(RouteNames.profile),
                             icon: const Icon(Icons.person, color: Colors.white),
                           ),
                         ],
@@ -148,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
@@ -164,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       InkWell(
                         onTap: widget.onViewAllTournaments,
                         child: Row(
@@ -177,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.arrow_right_outlined,
                               color: Colors.white,
                             ),

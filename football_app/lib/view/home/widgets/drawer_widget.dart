@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:football_app/bloc/auth/auth_bloc.dart';
+import 'package:football_app/bloc/auth/auth_event.dart';
+import 'package:football_app/bloc/auth/auth_state.dart';
+import 'package:football_app/config/routes/route_names.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -40,6 +46,7 @@ class AppDrawer extends StatelessWidget {
               icon: Icons.home_rounded,
               title: "Home",
               onTap: () => Navigator.pop(context),
+              iconColor: null,
             ),
             _DrawerItem(
               icon: Icons.emoji_events_rounded,
@@ -48,6 +55,7 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 onTournamentsTap?.call();
               },
+              iconColor: null,
             ),
             _DrawerItem(
               icon: Icons.person,
@@ -56,6 +64,7 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 onProfileTap?.call();
               },
+              iconColor: null,
             ),
             _DrawerItem(
               icon: Icons.assignment_outlined,
@@ -64,6 +73,7 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 onMyRegistrationTap?.call();
               },
+              iconColor: null,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8),
@@ -77,7 +87,36 @@ class AppDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 onBecomeOrganizerTap?.call();
               },
+              iconColor: null,
             ),
+
+            // Pushes the sign in / logout tile to the bottom.
+            const Spacer(),
+            const Divider(color: Colors.white12, height: 1),
+
+            BlocBuilder<AuthBloc, AuthState>(
+              buildWhen: (p, c) => p.status != c.status,
+              builder: (context, state) {
+                final loggedIn = state.status == AuthStatus.success;
+                return _DrawerItem(
+                  icon: loggedIn ? Icons.logout_rounded : Icons.login_rounded,
+                  title: loggedIn ? "Logout" : "Sign in",
+                  iconColor: loggedIn ? Colors.red : Colors.green,
+                  onTap: () {
+                    // Grab these before the drawer closes.
+                    final bloc = context.read<AuthBloc>();
+                    final router = GoRouter.of(context);
+                    Navigator.pop(context);
+                    if (loggedIn) {
+                      bloc.add(const AuthEvent.logoutRequested());
+                    } else {
+                      router.push(RouteNames.signIn);
+                    }
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -90,11 +129,13 @@ class _DrawerItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
   final bool highlight;
+  final Color? iconColor;
 
   const _DrawerItem({
     required this.icon,
     required this.title,
     required this.onTap,
+    required this.iconColor,
     this.highlight = false,
   });
 

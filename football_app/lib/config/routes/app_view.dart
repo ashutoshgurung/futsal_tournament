@@ -25,6 +25,12 @@ class _AppViewState extends State<_AppView> {
   }
 
   @override
+  void dispose() {
+    _appRouter.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       routerConfig: _appRouter.router,
@@ -35,8 +41,10 @@ class _AppViewState extends State<_AppView> {
         canvasColor: Colors.white,
       ),
       themeMode: ThemeMode.light,
-      builder: (context, child) =>
-          ColoredBox(color: Colors.white, child: child ?? const SizedBox.shrink()),
+      builder: (context, child) => ColoredBox(
+        color: Colors.white,
+        child: child ?? const SizedBox.shrink(),
+      ),
     );
   }
 }

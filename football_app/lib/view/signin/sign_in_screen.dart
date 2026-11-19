@@ -86,8 +86,17 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (state.status == AuthStatus.success) {
       // Lets the OS / password manager offer to save the credentials.
-      // Navigation away is handled by the router redirect.
       TextInput.finishAutofillContext();
+
+      if (context.canPop()) {
+        // Opened from another screen (guest flow): go back to where the
+        // user was, e.g. the tournament they wanted to book.
+        context.pop(true);
+      } else {
+        // Opened directly (e.g. after logout): go home. The router sends
+        // organizers on to their dashboard.
+        context.go(RouteNames.home);
+      }
       return;
     }
 
@@ -121,8 +130,8 @@ class _SignInScreenState extends State<SignInScreen> {
         builder: (context, state) {
           final busy = state.isLoading;
           final isSuccess = state.status == AuthStatus.success;
-          // Stays visible through "success" until the router removes this
-          // screen, so the user never sees an empty/black frame.
+          // Stays visible through "success" until this screen is closed,
+          // so the user never sees an empty/black frame.
           final showOverlay = busy || isSuccess;
 
           return PopScope(
@@ -272,6 +281,19 @@ class _SignInScreenState extends State<SignInScreen> {
                       ),
                     ),
                   ),
+
+                  // Close button: only when Sign In was pushed over another
+                  // screen (guest tapped Book / Profile etc.).
+                  if (context.canPop())
+                    SafeArea(
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: IconButton(
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          onPressed: busy ? null : () => context.pop(),
+                        ),
+                      ),
+                    ),
 
                   // Loading overlay (last child = on top of everything).
                   Positioned.fill(
