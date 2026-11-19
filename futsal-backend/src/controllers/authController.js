@@ -81,6 +81,7 @@ exports.google = asyncHandler(async (req, res) => {
     });
   }
 
+
   // 3. New user with an organization name: create org + organizer atomically
   const orgName = organizationName?.trim();
   if (orgName) {
@@ -132,6 +133,12 @@ exports.google = asyncHandler(async (req, res) => {
     organization: null,
     isNewUser: true,
   });
+});
+  // ---------------------------------------------------------------------------
+// Logout (stateless: the client deletes its token)
+// ---------------------------------------------------------------------------
+exports.logout = asyncHandler(async (req, res) => {
+  res.json({ success: true, message: 'Logged out' });
 });
 
 // ---------------------------------------------------------------------------
