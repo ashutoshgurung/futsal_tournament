@@ -153,14 +153,29 @@ class AuthRepositoryImpl implements AuthRepository {
     });
   }
 
-  @override
-  Future<void> logout() async {
-    await _storage.deleteToken();
+ @override
+Future<void> logout() async {
+  final token = await _storage.readToken(); // read BEFORE deleting
+  if (token != null && token.isNotEmpty) {
     try {
-      await _ensureGoogle();
-      await GoogleSignIn.instance.signOut();
-    } catch (_) {}
+      await _api
+          .postAPi(ApiConstants.logout, {}, token: token)
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      _log('server logout failed: ${e.runtimeType}');
+    }
   }
+  await clearSession(); // deletes the JWT + Google signOut
+}
+
+@override
+Future<void> clearSession() async {
+  await _storage.deleteToken();
+  try {
+    await _ensureGoogle();
+    await GoogleSignIn.instance.signOut();
+  } catch (_) {}
+}
 
   @override
   Future<String?> getSavedToken() => _storage.readToken();

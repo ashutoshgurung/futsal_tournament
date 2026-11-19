@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:football_app/bloc/auth/auth_bloc.dart';
+import 'package:football_app/bloc/auth/auth_state.dart';
+import 'package:football_app/config/routes/route_names.dart';
 import 'package:football_app/view/profile/widgets/delete_account_widget.dart';
 import 'package:football_app/view/profile/widgets/log_out_widget.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -13,9 +18,20 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthBloc>().state;
+  final loggedIn = auth.status == AuthStatus.success;
+  final user = auth.session?.user; // Map?
+  final name = (user?['name'] as String?) ?? 'Guest';
+  final email = (user?['email'] as String?) ?? '';
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SingleChildScrollView(
+      body: !loggedIn
+        ? Center(
+            child: ElevatedButton(
+              onPressed: () => context.go(RouteNames.signIn),
+              child: const Text('Sign in'),
+            ),
+          ): SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

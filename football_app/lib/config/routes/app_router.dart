@@ -169,12 +169,12 @@ class AppRouter {
     return null;
   }
 
-  static CustomTransitionPage<void> _fade(GoRouterState s, Widget child) =>
-      CustomTransitionPage<void>(
-        key: s.pageKey,
-        child: child,
-        transitionDuration: const Duration(milliseconds: 400),
-        transitionsBuilder: (_, anim, _, child) =>
-            FadeTransition(opacity: anim, child: child),
-      );
-}
+    static CustomTransitionPage<void> _fade(GoRouterState s, Widget child) =>
+        CustomTransitionPage<void>(
+          key: s.pageKey,
+          child: child,
+          transitionDuration: const Duration(milliseconds: 400),
+          transitionsBuilder: (_, anim, _, child) =>
+              FadeTransition(opacity: anim, child: child),
+        );
+  }
