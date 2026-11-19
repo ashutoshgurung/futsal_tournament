@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List banners = [
     'assets/images/futsal1.png',
-    'assets/images/futsa2.png',
+    'assets/images/futsal2.png',
     'assets/images/futsal3.png',
   ];
 
@@ -52,8 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTournamentsTap: widget.onViewAllTournaments,
           onProfileTap: () => _openProtected(RouteNames.profile),
           onMyRegistrationTap: () => _openProtected(RouteNames.myRegistration),
-          onBecomeOrganizerTap: () =>
-              _openProtected(RouteNames.becomeOrganizer),
+          onBecomeOrganizerTap: () => context.push(RouteNames.becomeOrganizer),
         ),
         body: SafeArea(
           child: SingleChildScrollView(

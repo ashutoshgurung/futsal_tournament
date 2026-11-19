@@ -175,7 +175,7 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
           // Token is already saved by the repository.
           this.context.read<AuthBloc>().add(const AuthEvent.appStarted());
           // The router redirect forwards organizers to /organizer.
-          this.context.go(RouteNames.home);
+          this.context.go(RouteNames.organizer);
         }
       },
       builder: (context, state) {
