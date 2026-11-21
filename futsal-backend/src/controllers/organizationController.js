@@ -37,12 +37,14 @@ exports.removeLogo = asyncHandler(async (req, res) => {
 
 const finite = (n) => (Number.isFinite(n) ? n : null); // null = unlimited
 
-// Org profile + plan limits + current usage (for a billing/usage screen)
 exports.get = asyncHandler(async (req, res) => {
-  const [tournaments, staff, teams] = await Promise.all([
-    prisma.tournament.count({ where: { organizationId: req.orgId } }),
-    prisma.user.count({ where: { organizationId: req.orgId } }),
-    prisma.team.count({ where: { organizationId: req.orgId } }),
+  const where = { organizationId: req.orgId };
+  const [tournaments, staff, teams, players, matches] = await Promise.all([
+    prisma.tournament.count({ where }),
+    prisma.user.count({ where }),
+    prisma.team.count({ where }),
+    prisma.player.count({ where }),
+    prisma.match.count({ where }),
   ]);
   const limits = plans[req.org.plan] || plans.free;
   res.json({
@@ -53,7 +55,7 @@ exports.get = asyncHandler(async (req, res) => {
       maxTeamsPerTournament: finite(limits.maxTeamsPerTournament),
       maxStaff: finite(limits.maxStaff),
     },
-    usage: { tournaments, staff, teams },
+    usage: { tournaments, staff, teams, players, matches },
   });
 });
 

@@ -6,7 +6,7 @@ import 'package:football_app/bloc/auth/auth_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_bloc.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_state.dart';
-import 'package:football_app/config/routes/route_names.dart';
+
 import 'package:football_app/repository/organization/organization_repository.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -139,6 +139,33 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
     );
   }
 
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  style: GoogleFonts.poppins(fontSize: 13, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+  }
+
   void _submit() {
     FocusScope.of(context).unfocus();
     final bloc = context.read<OrganizerRegisterBloc>();
@@ -174,7 +201,7 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
         if (state.status == RegisterStatus.failure) {
           _showError(state.errorMessage ?? 'Something went wrong');
         } else if (state.status == RegisterStatus.success) {
-          // Token is already saved by the repository.
+          _showSuccess('Organizer account created successfully!');
           this.context.read<AuthBloc>().add(const AuthEvent.appStarted());
           // The router redirect forwards organizers to /organizer.
           // this.context.go(RouteNames.organizer);

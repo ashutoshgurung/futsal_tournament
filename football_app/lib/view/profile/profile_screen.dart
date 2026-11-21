@@ -116,7 +116,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 30),
 
-            // ================= ACCOUNT SECTION =================
             Padding(
               padding: const EdgeInsets.only(left: 24, bottom: 10),
               child: Text(

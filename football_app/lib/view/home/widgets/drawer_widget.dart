@@ -85,7 +85,7 @@ class AppDrawer extends StatelessWidget {
               highlight: true,
               onTap: () {
                 Navigator.pop(context);
-                onBecomeOrganizerTap?.call();
+                context.push(RouteNames.becomeOrganizer);
               },
               iconColor: null,
             ),

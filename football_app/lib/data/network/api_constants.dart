@@ -55,7 +55,7 @@ class ApiConstants {
 
   // IP of the computer that RUNS the backend (check with `ipconfig`).
   // Only used as a fallback when API_BASE_URL is not passed.
-  static const String _lanHost = '192.168.0.7';
+  static const String _lanHost = '192.168.1.144';
 
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;

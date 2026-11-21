@@ -81,7 +81,6 @@ exports.google = asyncHandler(async (req, res) => {
     });
   }
 
-
   // 3. New user with an organization name: create org + organizer atomically
   const orgName = organizationName?.trim();
   if (orgName) {
@@ -134,7 +133,8 @@ exports.google = asyncHandler(async (req, res) => {
     isNewUser: true,
   });
 });
-  // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
 // Logout (stateless: the client deletes its token)
 // ---------------------------------------------------------------------------
 exports.logout = asyncHandler(async (req, res) => {
@@ -142,7 +142,7 @@ exports.logout = asyncHandler(async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Email + password registration (no token until the email is verified)
+// Email + password registration (organizer sign-ups get a token right away)
 // ---------------------------------------------------------------------------
 exports.register = asyncHandler(async (req, res) => {
   const { organizationName, name, password, contactEmail, logoUrl } = req.body;
@@ -178,11 +178,25 @@ exports.register = asyncHandler(async (req, res) => {
   // Fire-and-forget: a mail failure must not break signup (user can resend)
   trySendVerification(user);
 
-  res.status(201).json({
+  const body = {
     success: true,
-    message: 'Account created. Check your email to verify your address.',
     user: dto.user(user),
     organization: orgDto(org),
+  };
+
+  // Organizer sign-up (has an org): sign them in right away
+  if (org) {
+    return res.status(201).json({
+      ...body,
+      token: signToken(user),
+      message: 'Organizer account created.',
+    });
+  }
+
+  // Regular user: must verify email first
+  res.status(201).json({
+    ...body,
+    message: 'Account created. Check your email to verify your address.',
   });
 });
 
@@ -215,14 +229,53 @@ exports.login = asyncHandler(async (req, res) => {
 // ---------------------------------------------------------------------------
 // Email verification
 // ---------------------------------------------------------------------------
-exports.verifyEmail = asyncHandler(async (req, res) => {
-  const token = String(req.query.token || req.body?.token || '');
-  if (!token) throw new ApiError(400, 'Token is required');
 
-  const record = await prisma.emailVerificationToken.findUnique({
-    where: { tokenHash: hashToken(token) },
-  });
+// Small HTML page shown in the browser when the user taps the email link
+const page = (title, message, ok = true) => `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${title}</title>
+  <style>
+    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+         background:#000;font-family:Arial,sans-serif;color:#fff;text-align:center;padding:24px}
+    .card{background:#1c1c1e;border:1px solid #333;border-radius:18px;padding:32px;max-width:360px}
+    .icon{font-size:48px;color:${ok ? '#22c55e' : '#ef4444'}}
+    h2{margin:12px 0 8px}
+    p{color:#aaa;font-size:14px;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">${ok ? '&#10003;' : '&#10007;'}</div>
+    <h2>${title}</h2>
+    <p>${message}</p>
+  </div>
+</body>
+</html>`;
+
+exports.verifyEmail = asyncHandler(async (req, res) => {
+  const wantsHtml = req.method === 'GET';
+  const token = String(req.query.token || req.body?.token || '');
+
+  const record = token
+    ? await prisma.emailVerificationToken.findUnique({ where: { tokenHash: hashToken(token) } })
+    : null;
+
   if (!record || record.expiresAt < new Date()) {
+    if (wantsHtml) {
+      return res
+        .status(400)
+        .type('html')
+        .send(
+          page(
+            'Link expired',
+            'This verification link is invalid or has expired. Open the app and tap "Resend email".',
+            false
+          )
+        );
+    }
     throw new ApiError(400, 'Invalid or expired verification link');
   }
 
@@ -234,7 +287,12 @@ exports.verifyEmail = asyncHandler(async (req, res) => {
     await t.emailVerificationToken.deleteMany({ where: { userId: record.userId } });
   });
 
-  res.json({ success: true, message: 'Email verified. You can now log in.' });
+  if (wantsHtml) {
+    return res
+      .type('html')
+      .send(page('Email verified', 'Your email is verified. You can close this page and go back to the app.'));
+  }
+  res.json({ success: true, message: 'Email verified.' });
 });
 
 exports.resendVerification = asyncHandler(async (req, res) => {
@@ -285,7 +343,7 @@ exports.createOrganization = asyncHandler(async (req, res) => {
 exports.me = asyncHandler(async (req, res) => {
   res.json({ success: true, user: req.user, organization: req.org });
 });
-
+  
 // Lets Google-only users set a first password (no current password required)
 exports.changePassword = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({

@@ -5,49 +5,69 @@ const email = z.string().trim().toLowerCase().email();
 const password = z.string().min(8, 'Password must be at least 8 characters').max(72);
 const name = z.string().trim().min(2).max(80);
 
-// ---- auth / users / org ----
 // Treat "" and null as "not provided"
 const emptyToUndef = (v) =>
   v === null || (typeof v === 'string' && v.trim() === '') ? undefined : v;
 
+// Wraps any zod schema so null / "" / missing all become undefined
+const optional = (schema) => z.preprocess(emptyToUndef, schema.optional());
+
+// ---- auth / users / org ----
 exports.register = z.object({
-  organizationName: z.preprocess(emptyToUndef, name.optional()), // omitted => player account
-  contactEmail: z.preprocess(emptyToUndef, email.optional()),
-  logoUrl: z.preprocess(emptyToUndef, z.string().trim().url().max(500).optional()),
+  organizationName: optional(name), // omitted => regular user account
+  contactEmail: optional(email),
+  logoUrl: optional(z.string().trim().url().max(500)),
   name,
   email,
   password,
 });
+
 exports.login = z.object({ email, password: z.string().min(1) });
-exports.changePassword = z.object({ currentPassword: z.string().min(1), newPassword: password });
-exports.createUser = z.object({ name, email, password, role: z.enum(['admin', 'scorekeeper']).default('scorekeeper') });
-exports.updateUser = z.object({
-  name: name.optional(),
-  role: z.enum(['admin', 'scorekeeper']).optional(),
-  isActive: z.boolean().optional(),
-});
-exports.updateOrganization = z.object({
-  name: name.optional(),
-  logoUrl: z.string().url().optional(),
-  contactEmail: email.optional(),
-});
 
 exports.google = z.object({
   idToken: z.string().min(1, 'idToken is required'),
-  organizationName: z.preprocess(
-    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
-    name.optional()
-  ),
+  organizationName: optional(name),
 });
+
+// FIX: this was missing, so POST /api/auth/organization returned a 500
+exports.createOrganization = z.object({
+  organizationName: name,
+});
+
+exports.changePassword = z.object({
+  currentPassword: z.string().min(1).optional(), // Google-only users have none
+  newPassword: password,
+});
+
+// FIX: 'admin' is not in your Prisma UserRole enum
+exports.createUser = z.object({
+  name,
+  email,
+  password,
+  role: z.enum(['organizer', 'scorekeeper']).default('scorekeeper'),
+});
+exports.updateUser = z.object({
+  name: name.optional(),
+  role: z.enum(['organizer', 'scorekeeper']).optional(),
+  isActive: z.boolean().optional(),
+});
+
+exports.updateOrganization = z.object({
+  name: name.optional(),
+  contactEmail: optional(email),
+});
+
 // ---- tournaments ----
 const tournamentFields = {
   name: z.string().trim().min(2).max(100),
-  description: z.string().max(1000).optional(),
+  description: optional(z.string().max(1000)),
   format: z.enum(['league', 'knockout']).optional(),
   status: z.enum(['draft', 'registration', 'ongoing', 'completed']).optional(),
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
-  venue: z.string().max(200).optional(),
+  venue: optional(z.string().max(200)),
+  maxTeams: z.number().int().min(2).max(128).optional(), // was being stripped
+  imageUrl: optional(z.string().trim().url().max(500)),  // was being stripped
   rules: z
     .object({
       pointsWin: z.number().int().min(0).max(10),
@@ -71,9 +91,15 @@ exports.generateFixtures = z.object({
 // ---- teams / players ----
 const teamFields = {
   name: z.string().trim().min(2).max(80),
-  shortName: z.string().trim().min(2).max(6).optional(),
-  logoUrl: z.string().url().optional(),
-  manager: z.object({ name: z.string(), phone: z.string(), email: z.string().email() }).partial().optional(),
+  shortName: optional(z.string().trim().min(2).max(6)),
+  logoUrl: optional(z.string().trim().url().max(500)),
+  manager: z
+    .object({
+      name: optional(z.string().trim().max(100)),
+      phone: optional(z.string().trim().max(30)),
+      email: optional(email),
+    })
+    .optional(),
 };
 exports.createTeam = z.object({ tournament: uuid, ...teamFields });
 exports.updateTeam = z.object(teamFields).partial();
@@ -91,7 +117,7 @@ exports.updatePlayer = z.object(playerFields).partial();
 // ---- matches ----
 exports.updateMatch = z.object({
   scheduledAt: z.coerce.date().optional(),
-  court: z.string().max(100).optional(),
+  court: optional(z.string().max(100)),
   status: z.enum(['scheduled', 'postponed', 'cancelled']).optional(),
 });
 exports.matchEvent = z.object({

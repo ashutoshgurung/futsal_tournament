@@ -108,21 +108,16 @@ class AppRouter {
     router.dispose();
   }
 
-  static const _publicRoutes = {
-    RouteNames.signIn,
-    RouteNames.signUp,
-    RouteNames.forgotPassword,
-    RouteNames.forgotPasswordSent,
-  };
-
+  // Guests are sent to sign-in if they try to open these.
+  // NOTE: becomeOrganizer is NOT here, because guests can create an
+  // organizer account from that screen.
   static const _protectedRoutes = {
     RouteNames.profile,
     RouteNames.myRegistration,
-    RouteNames.becomeOrganizer,
     RouteNames.organizer,
   };
 
-  // Sign in / sign up / forgot password pages.
+  // Logged-in users are pushed away from these.
   static const _authRoutes = {
     RouteNames.signIn,
     RouteNames.signUp,
@@ -160,21 +155,26 @@ class AppRouter {
       if (_protectedRoutes.contains(loc)) return RouteNames.signIn;
       return null;
     }
-    // ---- Logged in ---- (rest unchanged)
 
     // ---- Logged in ----
     if (_authRoutes.contains(loc)) return landing;
+
+    // Just created an organization: leave the registration form.
+    if (isOrganizer && loc == RouteNames.becomeOrganizer) {
+      return RouteNames.organizer;
+    }
+
     if (isOrganizer && loc == RouteNames.home) return RouteNames.organizer;
     if (!isOrganizer && loc == RouteNames.organizer) return RouteNames.home;
     return null;
   }
 
-    static CustomTransitionPage<void> _fade(GoRouterState s, Widget child) =>
-        CustomTransitionPage<void>(
-          key: s.pageKey,
-          child: child,
-          transitionDuration: const Duration(milliseconds: 400),
-          transitionsBuilder: (_, anim, _, child) =>
-              FadeTransition(opacity: anim, child: child),
-        );
-  }
+  static CustomTransitionPage<void> _fade(GoRouterState s, Widget child) =>
+      CustomTransitionPage<void>(
+        key: s.pageKey,
+        child: child,
+        transitionDuration: const Duration(milliseconds: 400),
+        transitionsBuilder: (_, anim, _, child) =>
+            FadeTransition(opacity: anim, child: child),
+      );
+}
