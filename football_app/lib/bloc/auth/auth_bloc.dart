@@ -16,7 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<GoogleSignInRequested>(_onGoogle, transformer: droppable());
     on<LogoutRequested>(_onLogout);
     on<SessionExpired>(_onSessionExpired);
-    on<SessionRefreshRequested>(_onSessionRefresh, transformer: droppable());
+    on<SessionRefreshRequested>(_onSessionRefresh, transformer: restartable());
   }
   AuthState _loading(AuthMethod m) => state.copyWith(
     status: AuthStatus.loading,

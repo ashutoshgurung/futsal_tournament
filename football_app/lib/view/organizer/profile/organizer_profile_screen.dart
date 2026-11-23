@@ -145,12 +145,12 @@ class OrganizerProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Settings
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1C1C1E),
-                borderRadius: BorderRadius.circular(16),
-              ),
+            // Settings (Material instead of Container so ListTile ink
+            // splashes and backgrounds render correctly)
+            Material(
+              color: const Color(0xFF1C1C1E),
+              borderRadius: BorderRadius.circular(16),
+              clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
                   _SettingsTile(

@@ -16,8 +16,6 @@ abstract class AuthRepository {
     required String password,
   });
 
-  
-
   /// Asks the backend to send a new verification email.
   /// Returns the backend's message (same text whether or not the account exists).
   Future<String?> resendVerification(String email);
@@ -32,13 +30,13 @@ abstract class AuthRepository {
 
   Future<void> changePassword(String currentPassword, String newPassword);
 
-  Future<void> logout();        // user-initiated: server + local
-Future<void> clearSession();  // local only (session expired)
+  Future<void> logout(); // user-initiated: server + local
+  Future<void> clearSession(); // local only (session expired)
 
   Future<void> verifySessionInBackground();
   Future<String?> getSavedToken();
   Future<bool> hasValidSession();
 
-  Future<void> verifyEmailToken(String token) ;
-
+  Future<void> verifyEmailToken(String token);
+  Future<void> saveToken(String jwt);
 }

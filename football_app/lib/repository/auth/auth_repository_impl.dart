@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:football_app/data/exceptions/app_exceptions.dart';
 import 'package:football_app/data/network/api_constants.dart';
@@ -7,10 +8,6 @@ import 'package:football_app/data/storage/token_storage.dart';
 import 'package:football_app/model/auth_response/auth_response_model.dart';
 import 'package:football_app/repository/auth/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'dart:convert';
-
-import 'package:football_app/data/network/api_constants.dart';
-
 import 'package:http/http.dart' as http;
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -18,8 +15,6 @@ class AuthRepositoryImpl implements AuthRepository {
   final TokenStorage _storage;
   AuthRepositoryImpl(this._api, this._storage);
 
-  /// Debug-only logging. Nothing is printed in release builds, and no
-  /// personal data (email, token) is ever logged.
   void _log(String message) {
     if (kDebugMode) debugPrint('[GoogleAuth] $message');
   }
@@ -29,7 +24,7 @@ class AuthRepositoryImpl implements AuthRepository {
     return _googleInit ??= GoogleSignIn.instance
         .initialize(serverClientId: ApiConstants.googleServerClientId)
         .catchError((Object e) {
-          _googleInit = null; // allow retry
+          _googleInit = null;
           throw e;
         });
   }
@@ -49,21 +44,19 @@ class AuthRepositoryImpl implements AuthRepository {
     if (token == null || token.isEmpty) return (loggedIn: false, session: null);
 
     try {
-      // Explicit token => network layer will NOT fire the global 401 redirect.
       final res =
           await _api.getApi(ApiConstants.me, token: token)
               as Map<String, dynamic>;
-      // /auth/me has no token field, so merge it in for the model.
       final session = AuthResponseModel.fromJson({...res, 'token': token});
       return (loggedIn: true, session: session);
     } on UnAuthorizedException {
       await _storage.deleteToken();
       return (loggedIn: false, session: null);
     } on ForbiddenException {
-      await _storage.deleteToken(); // account / organization disabled
+      await _storage.deleteToken();
       return (loggedIn: false, session: null);
     } on NoInternetException {
-      return (loggedIn: true, session: null); // offline: still open the app
+      return (loggedIn: true, session: null);
     } on RequestTimeOutException {
       return (loggedIn: true, session: null);
     }
@@ -89,7 +82,7 @@ class AuthRepositoryImpl implements AuthRepository {
       'email': email.trim().toLowerCase(),
       'password': password,
     });
-    // Intentionally no _persist: the user must verify their email, then sign in.
+    // No _persist: regular users verify their email first.
     return _messageOf(res);
   }
 
@@ -101,12 +94,48 @@ class AuthRepositoryImpl implements AuthRepository {
     return _messageOf(res);
   }
 
+  /// Exchanges the emailed verification token for a login session and
+  /// stores the JWT. The bloc's session refresh then loads the user.
+  @override
+  Future<void> verifyEmailToken(String token) async {
+    final res = await http
+        .post(
+          Uri.parse(ApiConstants.verifyEmail),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'token': token}),
+        )
+        .timeout(ApiConstants.timeout);
+
+    Map<String, dynamic> body;
+    try {
+      body = jsonDecode(res.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception('Verification failed');
+    }
+
+    if (res.statusCode != 200 || body['success'] != true) {
+      throw Exception(body['message'] ?? 'Verification failed');
+    }
+
+    final jwt = body['token'] as String?;
+    if (jwt == null || jwt.isEmpty) {
+      throw Exception('Verification failed');
+    }
+    await _storage.saveToken(jwt); // <-- this is what keeps the user logged in
+  }
+
+  /// Used by the footballapp://login?token=... link (browser fallback).
+  @override
+  Future<void> saveToken(String jwt) => _storage.saveToken(jwt);
+
   @override
   Future<String?> getGoogleCredential() async {
     _log('start');
     try {
       await _ensureGoogle();
-      _log('supportsAuthenticate=${GoogleSignIn.instance.supportsAuthenticate()}');
+      _log(
+        'supportsAuthenticate=${GoogleSignIn.instance.supportsAuthenticate()}',
+      );
 
       final account = await GoogleSignIn.instance.authenticate();
       final idToken = account.authentication.idToken;
@@ -121,7 +150,6 @@ class AuthRepositoryImpl implements AuthRepository {
       if (kDebugMode) debugPrintStack(stackTrace: st, maxFrames: 8);
 
       if (e.code == GoogleSignInExceptionCode.canceled) {
-        // Picker dismissed, or no eligible account / config issue.
         return null;
       }
       throw BadRequestException(
@@ -158,29 +186,29 @@ class AuthRepositoryImpl implements AuthRepository {
     });
   }
 
- @override
-Future<void> logout() async {
-  final token = await _storage.readToken(); // read BEFORE deleting
-  if (token != null && token.isNotEmpty) {
-    try {
-      await _api
-          .postAPi(ApiConstants.logout, {}, token: token)
-          .timeout(const Duration(seconds: 5));
-    } catch (e) {
-      _log('server logout failed: ${e.runtimeType}');
+  @override
+  Future<void> logout() async {
+    final token = await _storage.readToken(); // read BEFORE deleting
+    if (token != null && token.isNotEmpty) {
+      try {
+        await _api
+            .postAPi(ApiConstants.logout, {}, token: token)
+            .timeout(const Duration(seconds: 5));
+      } catch (e) {
+        _log('server logout failed: ${e.runtimeType}');
+      }
     }
+    await clearSession();
   }
-  await clearSession(); // deletes the JWT + Google signOut
-}
 
-@override
-Future<void> clearSession() async {
-  await _storage.deleteToken();
-  try {
-    await _ensureGoogle();
-    await GoogleSignIn.instance.signOut();
-  } catch (_) {}
-}
+  @override
+  Future<void> clearSession() async {
+    await _storage.deleteToken();
+    try {
+      await _ensureGoogle();
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
+  }
 
   @override
   Future<String?> getSavedToken() => _storage.readToken();
@@ -203,22 +231,9 @@ Future<void> clearSession() async {
     } on ForbiddenException {
       await _storage.deleteToken();
     } on NoInternetException {
-      // offline: keep the token, try again next time
+      // offline: keep the token
     } on RequestTimeOutException {
-      // same as above
+      // same
     }
   }
-
-  @override
-  Future<void> verifyEmailToken(String token) async {
-  final res = await http.post(
-    Uri.parse('${ApiConstants.baseUrl}/api/auth/verify-email'),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({'token': token}),
-  );
-  final body = jsonDecode(res.body);
-  if (res.statusCode != 200 || body['success'] != true) {
-    throw Exception(body['message'] ?? 'Verification failed');
-  }
-}
 }
