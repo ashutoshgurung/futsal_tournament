@@ -22,6 +22,8 @@ exports.register = z.object({
   password,
 });
 
+  exports.verifyEmailToken = z.object({ token: z.string().min(1) });
+  exports.resendVerification = z.object({ email });
 exports.login = z.object({ email, password: z.string().min(1) });
 
 exports.google = z.object({
@@ -44,7 +46,7 @@ exports.createUser = z.object({
   name,
   email,
   password,
-  role: z.enum(['organizer', 'scorekeeper']).default('scorekeeper'),
+  role: z.enum(['organizer', 'scorekeeper']).default('user'),
 });
 exports.updateUser = z.object({
   name: name.optional(),

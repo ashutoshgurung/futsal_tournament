@@ -22,4 +22,7 @@ sealed class AuthEvent with _$AuthEvent {
   const factory AuthEvent.logoutRequested() = LogoutRequested;
 
   const factory AuthEvent.sessionExpired() = SessionExpired;
+
+const factory AuthEvent.sessionRefreshRequested() = SessionRefreshRequested;
+
 }

@@ -218,6 +218,7 @@ import 'package:football_app/bloc/auth/auth_event.dart';
 
 import 'package:football_app/config/routes/app_router.dart';
 import 'package:football_app/config/routes/navigation_service/navigation_service.dart';
+import 'package:football_app/core/deep_link/deep_link_listener.dart';
 
 import 'package:football_app/data/network/base_api_services.dart';
 import 'package:football_app/data/network/network_api_services.dart';
@@ -228,6 +229,7 @@ import 'package:football_app/repository/auth/auth_repository_impl.dart';
 import 'package:football_app/repository/organization/organization_repository.dart';
 import 'package:football_app/repository/tournament/tournament_api_repository.dart';
 import 'package:football_app/repository/tournament/tournament_repository.dart';
+import 'package:football_app/view/splash/splash_screen.dart';
 
 void main() {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -283,7 +285,7 @@ class MyApp extends StatelessWidget {
                   ..add(const AuthEvent.appStarted()),
           ),
         ],
-        child: const _AppView(), // must NOT be wrapped in another MaterialApp
+        child: const _AppView(),
       ),
     );
   }
@@ -317,18 +319,21 @@ class _AppViewState extends State<_AppView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: _appRouter.router,
-      title: 'Football Tournament',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        canvasColor: Colors.white,
-      ),
-      themeMode: ThemeMode.light,
-      builder: (context, child) => ColoredBox(
-        color: Colors.white,
-        child: child ?? const SizedBox.shrink(),
-      ),
-    );
+  routerConfig: _appRouter.router,
+  scaffoldMessengerKey: scaffoldMessengerKey,          // added
+  title: 'Football Tournament',
+  debugShowCheckedModeBanner: false,
+  theme: ThemeData(
+    scaffoldBackgroundColor: Colors.white,
+    canvasColor: Colors.white,
+  ),
+  themeMode: ThemeMode.light,
+  builder: (context, child) => DeepLinkListener(    // added wrapper
+    child: ColoredBox(
+      color: Colors.white,
+      child: child ?? const SizedBox.shrink(),
+    ),
+  ),
+);
   }
 }

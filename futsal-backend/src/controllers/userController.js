@@ -5,7 +5,7 @@ const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const findOwned = require('../utils/findOwned');
 const dto = require('../utils/dto');
-const { trySendVerification } = require('../utils/emailVerification');
+const { trySendVerification } = require('../services/emailVerification');
 
 // Roles an organizer may assign to people inside their organization.
 // New accounts start as `user`; the organizer promotes them (e.g. to scorekeeper) via update.

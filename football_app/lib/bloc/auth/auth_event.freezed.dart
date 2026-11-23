@@ -55,7 +55,7 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( AppStarted value)?  appStarted,TResult Function( LoginRequested value)?  loginRequested,TResult Function( RegisterRequested value)?  registerRequested,TResult Function( GoogleSignInRequested value)?  googleSignInRequested,TResult Function( LogoutRequested value)?  logoutRequested,TResult Function( SessionExpired value)?  sessionExpired,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( AppStarted value)?  appStarted,TResult Function( LoginRequested value)?  loginRequested,TResult Function( RegisterRequested value)?  registerRequested,TResult Function( GoogleSignInRequested value)?  googleSignInRequested,TResult Function( LogoutRequested value)?  logoutRequested,TResult Function( SessionExpired value)?  sessionExpired,TResult Function( SessionRefreshRequested value)?  sessionRefreshRequested,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
@@ -64,7 +64,8 @@ return loginRequested(_that);case RegisterRequested() when registerRequested != 
 return registerRequested(_that);case GoogleSignInRequested() when googleSignInRequested != null:
 return googleSignInRequested(_that);case LogoutRequested() when logoutRequested != null:
 return logoutRequested(_that);case SessionExpired() when sessionExpired != null:
-return sessionExpired(_that);case _:
+return sessionExpired(_that);case SessionRefreshRequested() when sessionRefreshRequested != null:
+return sessionRefreshRequested(_that);case _:
   return orElse();
 
 }
@@ -82,7 +83,7 @@ return sessionExpired(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( AppStarted value)  appStarted,required TResult Function( LoginRequested value)  loginRequested,required TResult Function( RegisterRequested value)  registerRequested,required TResult Function( GoogleSignInRequested value)  googleSignInRequested,required TResult Function( LogoutRequested value)  logoutRequested,required TResult Function( SessionExpired value)  sessionExpired,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( AppStarted value)  appStarted,required TResult Function( LoginRequested value)  loginRequested,required TResult Function( RegisterRequested value)  registerRequested,required TResult Function( GoogleSignInRequested value)  googleSignInRequested,required TResult Function( LogoutRequested value)  logoutRequested,required TResult Function( SessionExpired value)  sessionExpired,required TResult Function( SessionRefreshRequested value)  sessionRefreshRequested,}){
 final _that = this;
 switch (_that) {
 case AppStarted():
@@ -91,7 +92,8 @@ return loginRequested(_that);case RegisterRequested():
 return registerRequested(_that);case GoogleSignInRequested():
 return googleSignInRequested(_that);case LogoutRequested():
 return logoutRequested(_that);case SessionExpired():
-return sessionExpired(_that);}
+return sessionExpired(_that);case SessionRefreshRequested():
+return sessionRefreshRequested(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -105,7 +107,7 @@ return sessionExpired(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( AppStarted value)?  appStarted,TResult? Function( LoginRequested value)?  loginRequested,TResult? Function( RegisterRequested value)?  registerRequested,TResult? Function( GoogleSignInRequested value)?  googleSignInRequested,TResult? Function( LogoutRequested value)?  logoutRequested,TResult? Function( SessionExpired value)?  sessionExpired,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( AppStarted value)?  appStarted,TResult? Function( LoginRequested value)?  loginRequested,TResult? Function( RegisterRequested value)?  registerRequested,TResult? Function( GoogleSignInRequested value)?  googleSignInRequested,TResult? Function( LogoutRequested value)?  logoutRequested,TResult? Function( SessionExpired value)?  sessionExpired,TResult? Function( SessionRefreshRequested value)?  sessionRefreshRequested,}){
 final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
@@ -114,7 +116,8 @@ return loginRequested(_that);case RegisterRequested() when registerRequested != 
 return registerRequested(_that);case GoogleSignInRequested() when googleSignInRequested != null:
 return googleSignInRequested(_that);case LogoutRequested() when logoutRequested != null:
 return logoutRequested(_that);case SessionExpired() when sessionExpired != null:
-return sessionExpired(_that);case _:
+return sessionExpired(_that);case SessionRefreshRequested() when sessionRefreshRequested != null:
+return sessionRefreshRequested(_that);case _:
   return null;
 
 }
@@ -131,7 +134,7 @@ return sessionExpired(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  appStarted,TResult Function( String email,  String password)?  loginRequested,TResult Function( String name,  String email,  String password)?  registerRequested,TResult Function()?  googleSignInRequested,TResult Function()?  logoutRequested,TResult Function()?  sessionExpired,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  appStarted,TResult Function( String email,  String password)?  loginRequested,TResult Function( String name,  String email,  String password)?  registerRequested,TResult Function()?  googleSignInRequested,TResult Function()?  logoutRequested,TResult Function()?  sessionExpired,TResult Function()?  sessionRefreshRequested,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
 return appStarted();case LoginRequested() when loginRequested != null:
@@ -139,7 +142,8 @@ return loginRequested(_that.email,_that.password);case RegisterRequested() when 
 return registerRequested(_that.name,_that.email,_that.password);case GoogleSignInRequested() when googleSignInRequested != null:
 return googleSignInRequested();case LogoutRequested() when logoutRequested != null:
 return logoutRequested();case SessionExpired() when sessionExpired != null:
-return sessionExpired();case _:
+return sessionExpired();case SessionRefreshRequested() when sessionRefreshRequested != null:
+return sessionRefreshRequested();case _:
   return orElse();
 
 }
@@ -157,7 +161,7 @@ return sessionExpired();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  appStarted,required TResult Function( String email,  String password)  loginRequested,required TResult Function( String name,  String email,  String password)  registerRequested,required TResult Function()  googleSignInRequested,required TResult Function()  logoutRequested,required TResult Function()  sessionExpired,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  appStarted,required TResult Function( String email,  String password)  loginRequested,required TResult Function( String name,  String email,  String password)  registerRequested,required TResult Function()  googleSignInRequested,required TResult Function()  logoutRequested,required TResult Function()  sessionExpired,required TResult Function()  sessionRefreshRequested,}) {final _that = this;
 switch (_that) {
 case AppStarted():
 return appStarted();case LoginRequested():
@@ -165,7 +169,8 @@ return loginRequested(_that.email,_that.password);case RegisterRequested():
 return registerRequested(_that.name,_that.email,_that.password);case GoogleSignInRequested():
 return googleSignInRequested();case LogoutRequested():
 return logoutRequested();case SessionExpired():
-return sessionExpired();}
+return sessionExpired();case SessionRefreshRequested():
+return sessionRefreshRequested();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -179,7 +184,7 @@ return sessionExpired();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  appStarted,TResult? Function( String email,  String password)?  loginRequested,TResult? Function( String name,  String email,  String password)?  registerRequested,TResult? Function()?  googleSignInRequested,TResult? Function()?  logoutRequested,TResult? Function()?  sessionExpired,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  appStarted,TResult? Function( String email,  String password)?  loginRequested,TResult? Function( String name,  String email,  String password)?  registerRequested,TResult? Function()?  googleSignInRequested,TResult? Function()?  logoutRequested,TResult? Function()?  sessionExpired,TResult? Function()?  sessionRefreshRequested,}) {final _that = this;
 switch (_that) {
 case AppStarted() when appStarted != null:
 return appStarted();case LoginRequested() when loginRequested != null:
@@ -187,7 +192,8 @@ return loginRequested(_that.email,_that.password);case RegisterRequested() when 
 return registerRequested(_that.name,_that.email,_that.password);case GoogleSignInRequested() when googleSignInRequested != null:
 return googleSignInRequested();case LogoutRequested() when logoutRequested != null:
 return logoutRequested();case SessionExpired() when sessionExpired != null:
-return sessionExpired();case _:
+return sessionExpired();case SessionRefreshRequested() when sessionRefreshRequested != null:
+return sessionRefreshRequested();case _:
   return null;
 
 }
@@ -453,6 +459,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'AuthEvent.sessionExpired()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class SessionRefreshRequested implements AuthEvent {
+  const SessionRefreshRequested();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionRefreshRequested);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.sessionRefreshRequested()';
 }
 
 

@@ -12,10 +12,18 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { success: false, message: 'Too many attempts, please try again later' },
 });
+const emailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,   // 1 hour window
+  limit: 10,                  // max 10 requests per IP in that hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many email requests, please try again later' },
+});
 
 
-router.get('/verify-email', c.verifyEmail);
-router.post('/resend-verification', limiter, c.resendVerification);
+  router.get('/verify-email', limiter, c.verifyEmail);
+  router.post('/verify-email', limiter, validate(s.verifyEmailToken), c.verifyEmailJson);
+  router.post('/resend-verification', emailLimiter, validate(s.resendVerification), c.resendVerification);
 
 router.post('/register', limiter, validate(s.register), c.register);
 router.post('/google', limiter, validate(s.google), c.google);

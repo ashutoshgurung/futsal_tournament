@@ -7,6 +7,11 @@ import 'package:football_app/data/storage/token_storage.dart';
 import 'package:football_app/model/auth_response/auth_response_model.dart';
 import 'package:football_app/repository/auth/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
+
+import 'package:football_app/data/network/api_constants.dart';
+
+import 'package:http/http.dart' as http;
 
 class AuthRepositoryImpl implements AuthRepository {
   final BaseApiServices _api;
@@ -203,4 +208,17 @@ Future<void> clearSession() async {
       // same as above
     }
   }
+
+  @override
+  Future<void> verifyEmailToken(String token) async {
+  final res = await http.post(
+    Uri.parse('${ApiConstants.baseUrl}/api/auth/verify-email'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'token': token}),
+  );
+  final body = jsonDecode(res.body);
+  if (res.statusCode != 200 || body['success'] != true) {
+    throw Exception(body['message'] ?? 'Verification failed');
+  }
+}
 }

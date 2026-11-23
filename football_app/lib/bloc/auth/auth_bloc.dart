@@ -16,6 +16,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<GoogleSignInRequested>(_onGoogle, transformer: droppable());
     on<LogoutRequested>(_onLogout);
     on<SessionExpired>(_onSessionExpired);
+    on<SessionRefreshRequested>(_onSessionRefresh, transformer: droppable());
   }
   AuthState _loading(AuthMethod m) => state.copyWith(
     status: AuthStatus.loading,
@@ -125,4 +126,26 @@ void onChange(Change<AuthState> change) {
   }
   emit(_loggedOut.copyWith(message: 'Session expired. Please sign in again.'));
 }
+
+  /// Quiet refresh: used after a verification link or when the app resumes.
+  /// Never logs the user out and never sets a message.
+  Future<void> _onSessionRefresh(
+    SessionRefreshRequested e,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state.isLoading) return;
+    try {
+      final r = await _repo.restoreSession();
+      if (r.loggedIn) {
+        emit(state.copyWith(
+          status: AuthStatus.success,
+          method: null,
+          session: r.session,
+          message: null,
+        ));
+      }
+    } catch (err) {
+      debugPrint('session refresh failed: $err');
+    }
+  }
 }

@@ -55,7 +55,7 @@ class ApiConstants {
 
   // IP of the computer that RUNS the backend (check with `ipconfig`).
   // Only used as a fallback when API_BASE_URL is not passed.
-  static const String _lanHost = '192.168.1.144';
+  static const String _lanHost = 'http://10.0.2.2:5001';
 
   static String get baseUrl {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
@@ -65,7 +65,7 @@ class ApiConstants {
     }
     // Android real device. For the emulator use 10.0.2.2 via dart-define.
     if (Platform.isAndroid) return 'http://$_lanHost:$_port';
-    return 'http://$_lanHost:$_port'; // iOS real device (simulator: use localhost)
+    return 'http://10.0.2.2:5001'; // iOS real device (simulator: use localhost)
   }
 
   // Endpoints

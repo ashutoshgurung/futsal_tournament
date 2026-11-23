@@ -1,7 +1,4 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:football_app/bloc/auth/auth_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
@@ -14,8 +11,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 const _kAccent = Color(0xFFB7F34A);
-const _kBg = Color(0xFF0B0F0A);
-const _kLoginImage = 'assets/images/login_image.jpg';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -28,22 +23,11 @@ class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  final _emailFocus = FocusNode();
-  final _passwordFocus = FocusNode();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Decode the background once so it never flashes black.
-    precacheImage(const AssetImage(_kLoginImage), context);
-  }
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
-    _emailFocus.dispose();
-    _passwordFocus.dispose();
     super.dispose();
   }
 
@@ -67,44 +51,15 @@ class _SignInScreenState extends State<SignInScreen> {
     bloc.add(const AuthEvent.googleSignInRequested());
   }
 
-  /// Opens Sign Up. If the user registers, Sign Up pops with their email,
-  /// so we prefill it and jump to the password field.
-  Future<void> _openSignup() async {
-    final email = await context.push<String>(RouteNames.signUp);
-    if (!mounted) return;
-    if (email != null && email.isNotEmpty) {
-      _email.text = email;
-      _passwordFocus.requestFocus();
-    }
-  }
-
+  void _openSignup() => context.push(RouteNames.signUp);
   void _openForgotPassword() => context.push(RouteNames.forgotPassword);
-
   void _onState(BuildContext context, AuthState state) {
     // SignupScreen may be pushed on top: only the visible screen reacts.
     if (!(ModalRoute.of(context)?.isCurrent ?? false)) return;
-
-    if (state.status == AuthStatus.success) {
-      // Lets the OS / password manager offer to save the credentials.
-      TextInput.finishAutofillContext();
-
-      if (state.isOrganizer) {
-        // Organizer: clear the stack and open the dashboard.
-        context.go(RouteNames.organizer);
-      } else if (context.canPop()) {
-        // Opened from another screen (guest tapped Book / Profile etc.):
-        // go back to where the user was so they can continue.
-        context.pop(true);
-      } else {
-        // Opened directly (e.g. after logout): go home.
-        context.go(RouteNames.home);
-      }
-      return;
-    }
-
     final message = state.message;
     if (message == null) return;
 
+    // Same hint for every failed login, so it reveals nothing about any account.
     final isBadCredentials =
         state.status == AuthStatus.failure &&
         message.toLowerCase().contains('invalid email or password');
@@ -124,200 +79,141 @@ class _SignInScreenState extends State<SignInScreen> {
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (p, c) =>
           c.status == AuthStatus.failure ||
-          c.status == AuthStatus.success ||
           (c.status == AuthStatus.unauthenticated && c.message != null),
       listener: _onState,
-      child: BlocBuilder<AuthBloc, AuthState>(
-        buildWhen: (p, c) => p.status != c.status || p.method != c.method,
-        builder: (context, state) {
-          final busy = state.isLoading;
-          final isSuccess = state.status == AuthStatus.success;
-          // Stays visible through "success" until this screen is closed,
-          // so the user never sees an empty/black frame.
-          final showOverlay = busy || isSuccess;
-
-          return PopScope(
-            canPop: !showOverlay,
-            child: Scaffold(
-              backgroundColor: _kBg,
-              body: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Image.asset(
-                      _kLoginImage,
-                      fit: BoxFit.cover,
-                      gaplessPlayback: true,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/login_image.jpg',
+                fit: BoxFit.cover,
+              ),
+            ),
+            Positioned.fill(
+              child: Container(color: Colors.black.withValues(alpha: 0.45)),
+            ),
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                  ),
-                  Positioned.fill(
-                    child: Container(
-                      color: Colors.black.withValues(alpha: 0.45),
-                    ),
-                  ),
-                  SafeArea(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) => SingleChildScrollView(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
-                          ),
-                          child: AutofillGroup(
-                            child: Form(
-                              key: _formKey,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 30,
+                    child: Form(
+                      key: _formKey,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        child: BlocBuilder<AuthBloc, AuthState>(
+                          buildWhen: (p, c) =>
+                              p.status != c.status || p.method != c.method,
+                          builder: (context, state) {
+                            final busy = state.isLoading;
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Hello!',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Hello!',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 35,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Sign in to your account',
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 50),
-                                    IgnorePointer(
-                                      ignoring: busy,
-                                      child: AnimatedOpacity(
-                                        duration: const Duration(
-                                          milliseconds: 150,
-                                        ),
-                                        opacity: busy ? 0.6 : 1,
-                                        child: Column(
-                                          children: [
-                                            EmailInputWidget(
-                                              controller: _email,
-                                              focusNode: _emailFocus,
-                                              onSubmitted: (_) =>
-                                                  _passwordFocus.requestFocus(),
-                                            ),
-                                            const SizedBox(height: 15),
-                                            PasswordInputWidget(
-                                              controller: _password,
-                                              focusNode: _passwordFocus,
-                                              onSubmitted: (_) => _login(),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 15),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                      ),
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: GestureDetector(
-                                          onTap: busy
-                                              ? null
-                                              : _openForgotPassword,
-                                          child: Text(
-                                            'Forgot Password?',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 25),
-                                    LoginButtonWidget(
-                                      onPressed: _login,
-                                      isLoading: state.isEmailLoading,
-                                    ),
-                                    const SizedBox(height: 30),
-                                    const _OrDivider(text: 'Or sign in with'),
-                                    const SizedBox(height: 25),
-                                    _GoogleButton(
-                                      loading: state.isGoogleLoading,
-                                      onPressed: busy ? null : _google,
-                                    ),
-                                    const SizedBox(height: 40),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                Text(
+                                  'Sign in to your account',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 50),
+                                IgnorePointer(
+                                  ignoring: busy,
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 150),
+                                    opacity: busy ? 0.6 : 1,
+                                    child: Column(
                                       children: [
-                                        Text(
-                                          "Don't have an account? ",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            color: Colors.white70,
-                                          ),
-                                        ),
-                                        InkWell(
-                                          onTap: busy ? null : _openSignup,
-                                          child: Text(
-                                            'Sign Up',
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: _kAccent,
-                                            ),
-                                          ),
+                                        EmailInputWidget(controller: _email),
+                                        const SizedBox(height: 15),
+                                        PasswordInputWidget(
+                                          controller: _password,
                                         ),
                                       ],
                                     ),
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
+                                  child: Align(
+                                    alignment: Alignment.centerRight,
+                                    child: GestureDetector(
+                                      onTap: busy ? null : _openForgotPassword,
+                                      child: Text(
+                                        'Forgot Password?',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+                                LoginButtonWidget(
+                                  onPressed: _login,
+                                  isLoading: state.isEmailLoading,
+                                ),
+                                const SizedBox(height: 30),
+                                const _OrDivider(text: 'Or sign in with'),
+                                const SizedBox(height: 25),
+                                _GoogleButton(
+                                  loading: state.isGoogleLoading,
+                                  onPressed: busy ? null : _google,
+                                ),
+                                const SizedBox(height: 40),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Don't have an account? ",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: busy ? null : _openSignup,
+                                      child: Text(
+                                        'Sign Up',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: _kAccent,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                            ),
-                          ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
                   ),
-
-                  // Close button: only when Sign In was pushed over another
-                  // screen (guest tapped Book / Profile etc.).
-                  if (context.canPop())
-                    SafeArea(
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          onPressed: busy ? null : () => context.pop(),
-                        ),
-                      ),
-                    ),
-
-                  // Loading overlay (last child = on top of everything).
-                  Positioned.fill(
-                    child: IgnorePointer(
-                      ignoring: !showOverlay,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 250),
-                        opacity: showOverlay ? 1 : 0,
-                        child: _LoadingOverlay(
-                          message: isSuccess
-                              ? 'Welcome back!'
-                              : 'Signing you in...',
-                          isSuccess: isSuccess,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -359,60 +255,6 @@ void _showError(
               ),
       ),
     );
-}
-
-class _LoadingOverlay extends StatelessWidget {
-  final String message;
-  final bool isSuccess;
-  const _LoadingOverlay({required this.message, required this.isSuccess});
-
-  @override
-  Widget build(BuildContext context) {
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.55),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: isSuccess
-                  ? const Icon(
-                      Icons.check_circle_rounded,
-                      key: ValueKey('done'),
-                      size: 52,
-                      color: _kAccent,
-                    )
-                  : const SizedBox(
-                      key: ValueKey('loading'),
-                      width: 44,
-                      height: 44,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: _kAccent,
-                      ),
-                    ),
-            ),
-            const SizedBox(height: 20),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Text(
-                message,
-                key: ValueKey(message),
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _OrDivider extends StatelessWidget {

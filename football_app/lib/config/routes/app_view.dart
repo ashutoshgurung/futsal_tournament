@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:football_app/bloc/auth/auth_bloc.dart';
 import 'package:football_app/config/routes/app_router.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -25,12 +24,6 @@ class _AppViewState extends State<_AppView> {
   }
 
   @override
-  void dispose() {
-    _appRouter.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       routerConfig: _appRouter.router,
@@ -41,10 +34,8 @@ class _AppViewState extends State<_AppView> {
         canvasColor: Colors.white,
       ),
       themeMode: ThemeMode.light,
-      builder: (context, child) => ColoredBox(
-        color: Colors.white,
-        child: child ?? const SizedBox.shrink(),
-      ),
+      builder: (context, child) =>
+          ColoredBox(color: Colors.white, child: child ?? const SizedBox.shrink()),
     );
   }
 }

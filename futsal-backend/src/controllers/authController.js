@@ -8,7 +8,166 @@ const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { uniqueSlug } = require('../utils/slugify');
 const dto = require('../utils/dto');
-const { hashToken, trySendVerification } = require('../utils/emailVerification');
+const { hashToken, trySendVerification } = require('../services/emailVerification');
+const verification = require('../services/emailVerification'); // adjust path
+
+// ---- top of authController.js, next to APP_SCHEME ----
+const APP_SCHEME = (process.env.APP_SCHEME || 'footballapp').replace(/[^a-zA-Z0-9+.-]/g, '');
+const ANDROID_PACKAGE = process.env.ANDROID_PACKAGE || 'com.example.football_app';
+
+// ---- replace your existing verifyEmail with this ----
+exports.verifyEmail = async (req, res) => {
+  try {
+    const { token, confirm } = req.query;
+    if (!token || typeof token !== 'string') {
+      return page(res, 400, 'Invalid link', 'This verification link is invalid.', false);
+    }
+
+    // Browser fallback: verify right here
+    if (confirm === '1') {
+      const r = await verifyToken(token);
+      return page(
+        res,
+        r.status,
+        r.ok ? 'Email verified' : 'Link not valid',
+        r.ok ? 'Your email has been verified. You can now return to the app.' : r.message,
+        r.ok
+      );
+    }
+
+    // Landing page: choose app or browser (does NOT consume the token)
+    const encoded = encodeURIComponent(token);
+    const isAndroid = /android/i.test(req.get('user-agent') || '');
+
+    const browserUrl = `/api/auth/verify-email?token=${encoded}&confirm=1`;
+    const absoluteBrowserUrl = `${process.env.API_URL}${browserUrl}`;
+
+    const appUrl = isAndroid
+      ? `intent://verify-email?token=${encoded}#Intent;scheme=${APP_SCHEME};package=${ANDROID_PACKAGE};S.browser_fallback_url=${encodeURIComponent(absoluteBrowserUrl)};end`
+      : `${APP_SCHEME}://verify-email?token=${encoded}`;
+
+    return res.type('html').send(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify your email</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+    .card{background:#fff;padding:32px;border-radius:12px;max-width:380px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+    h1{font-size:22px;margin:0 0 8px}
+    p{color:#555;line-height:1.5}
+    .btn{display:block;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:12px}
+    .primary{background:#16a34a;color:#fff}
+    .secondary{background:#fff;color:#16a34a;border:1px solid #16a34a}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Verify your email</h1>
+    <p>Continue in the app, or verify right here in your browser.</p>
+    <a class="btn primary" href="${appUrl}">Open in app</a>
+    <a class="btn secondary" href="${browserUrl}">Verify in browser</a>
+  </div>
+</body>
+</html>`);
+  } catch (err) {
+    console.error('verifyEmail error:', err);
+    return page(res, 500, 'Something went wrong', 'Please try again in a moment.', false);
+  }
+};
+// ---------- helper: HTML result page ----------
+const page = (res, status, title, message, ok) =>
+  res.status(status).type('html').send(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+    .card{background:#fff;padding:32px;border-radius:12px;max-width:380px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+    .icon{font-size:48px}
+    h1{font-size:22px;margin:12px 0 8px;color:${ok ? '#16a34a' : '#dc2626'}}
+    p{color:#555;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">${ok ? '✅' : '⚠️'}</div>
+    <h1>${title}</h1>
+    <p>${message}</p>
+  </div>
+</body>
+</html>`);
+
+// ---------- helper: shared token check ----------
+const verifyToken = async (token) => {
+  if (!token || typeof token !== 'string') {
+    return { ok: false, status: 400, message: 'Invalid link' };
+  }
+
+  const record = await prisma.emailVerificationToken.findUnique({
+    where: { tokenHash: verification.hashToken(token) },
+  });
+  if (!record) {
+    return { ok: false, status: 400, message: 'Link is invalid or already used' };
+  }
+
+  if (record.expiresAt < new Date()) {
+    await prisma.emailVerificationToken.delete({ where: { id: record.id } });
+    return { ok: false, status: 400, message: 'Link expired. Request a new email.' };
+  }
+
+  await prisma.$transaction([
+    prisma.user.update({
+      where: { id: record.userId },
+      data: { emailVerified: true, emailVerifiedAt: new Date() },
+    }),
+    prisma.emailVerificationToken.deleteMany({ where: { userId: record.userId } }),
+  ]);
+
+  return { ok: true, status: 200, message: 'Email verified' };
+};
+
+// ---------- POST /api/auth/verify-email   body: { token } ----------
+// Called by the Flutter app after it catches the deep link
+exports.verifyEmailJson = async (req, res, next) => {
+  try {
+    const r = await verifyToken(req.body.token);
+    res.status(r.status).json({ success: r.ok, message: r.message });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ---------- POST /api/auth/resend-verification   body: { email } ----------
+exports.resendVerification = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: String(req.body.email).toLowerCase() },
+    });
+
+    if (user && !user.emailVerified) {
+      try {
+        await verification.sendVerification(user);
+      } catch (err) {
+        if (err.status === 429) {
+          return res.status(429).json({ success: false, message: err.message });
+        }
+        throw err;
+      }
+    }
+
+    // Same response whether or not the account exists
+    res.json({
+      success: true,
+      message: 'If the account exists, a new verification email has been sent',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 const signToken = (user) =>
   jwt.sign(
@@ -226,87 +385,6 @@ exports.login = asyncHandler(async (req, res) => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Email verification
-// ---------------------------------------------------------------------------
-
-// Small HTML page shown in the browser when the user taps the email link
-const page = (title, message, ok = true) => `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${title}</title>
-  <style>
-    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-         background:#000;font-family:Arial,sans-serif;color:#fff;text-align:center;padding:24px}
-    .card{background:#1c1c1e;border:1px solid #333;border-radius:18px;padding:32px;max-width:360px}
-    .icon{font-size:48px;color:${ok ? '#22c55e' : '#ef4444'}}
-    h2{margin:12px 0 8px}
-    p{color:#aaa;font-size:14px;line-height:1.5}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div class="icon">${ok ? '&#10003;' : '&#10007;'}</div>
-    <h2>${title}</h2>
-    <p>${message}</p>
-  </div>
-</body>
-</html>`;
-
-exports.verifyEmail = asyncHandler(async (req, res) => {
-  const wantsHtml = req.method === 'GET';
-  const token = String(req.query.token || req.body?.token || '');
-
-  const record = token
-    ? await prisma.emailVerificationToken.findUnique({ where: { tokenHash: hashToken(token) } })
-    : null;
-
-  if (!record || record.expiresAt < new Date()) {
-    if (wantsHtml) {
-      return res
-        .status(400)
-        .type('html')
-        .send(
-          page(
-            'Link expired',
-            'This verification link is invalid or has expired. Open the app and tap "Resend email".',
-            false
-          )
-        );
-    }
-    throw new ApiError(400, 'Invalid or expired verification link');
-  }
-
-  await tx(async (t) => {
-    await t.user.update({
-      where: { id: record.userId },
-      data: { emailVerified: true, emailVerifiedAt: new Date() },
-    });
-    await t.emailVerificationToken.deleteMany({ where: { userId: record.userId } });
-  });
-
-  if (wantsHtml) {
-    return res
-      .type('html')
-      .send(page('Email verified', 'Your email is verified. You can close this page and go back to the app.'));
-  }
-  res.json({ success: true, message: 'Email verified.' });
-});
-
-exports.resendVerification = asyncHandler(async (req, res) => {
-  const email = String(req.body.email || '').toLowerCase();
-  const user = email ? await prisma.user.findUnique({ where: { email } }) : null;
-
-  if (user && user.isActive && !user.emailVerified) await trySendVerification(user);
-
-  // Same response either way so this can't be used to discover registered emails
-  res.json({
-    success: true,
-    message: 'If that account exists and is unverified, a new email has been sent.',
-  });
-});
 
 // ---------------------------------------------------------------------------
 // For users who signed up without an organization
