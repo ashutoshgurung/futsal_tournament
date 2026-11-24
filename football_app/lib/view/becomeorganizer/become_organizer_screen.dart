@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:football_app/bloc/auth/auth_bloc.dart';
 import 'package:football_app/bloc/auth/auth_event.dart';
+import 'package:football_app/bloc/auth/auth_state.dart'; // NEW
 import 'package:football_app/bloc/organizer_register/organizer_register_bloc.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_event.dart';
 import 'package:football_app/bloc/organizer_register/organizer_register_state.dart';
+import 'package:football_app/config/routes/route_names.dart'; // NEW
 
 import 'package:football_app/repository/organization/organization_repository.dart';
 
@@ -204,7 +206,6 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
           _showSuccess('Organizer account created successfully!');
           this.context.read<AuthBloc>().add(const AuthEvent.appStarted());
           // The router redirect forwards organizers to /organizer.
-          // this.context.go(RouteNames.organizer);
         }
       },
       builder: (context, state) {
@@ -489,6 +490,55 @@ class _BecomeOrganizerViewState extends State<_BecomeOrganizerView> {
                                 ),
                               ),
                       ),
+                    ),
+
+                    // ---------- NEW: Already have an organizer account? ----------
+                    const SizedBox(height: 20),
+                    Builder(
+                      builder: (context) {
+                        // Only show to guests. Logged-in users are redirected
+                        // away from sign-in by the router anyway.
+                        final loggedIn = context.select<AuthBloc, bool>(
+                          (b) => b.state.status == AuthStatus.success,
+                        );
+                        if (loggedIn) return const SizedBox.shrink();
+
+                        return Center(
+                          child: Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                'Already have an organizer account?',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: isSubmitting
+                                    ? null
+                                    : () => context.push(RouteNames.signIn,extra:true),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                  ),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  'Sign in',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

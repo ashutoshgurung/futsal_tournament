@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:football_app/view/organizer/dashboard/organizer_dashboard_screen.dart';
 import 'package:football_app/view/organizer/profile/organizer_profile_screen.dart';
-import 'package:football_app/view/organizer/teams/organizer_team_screen.dart';
+import 'package:football_app/view/organizer/teams/organizer_teams_screen.dart';
 import 'package:football_app/view/organizer/tournaments/organizer_tournaments_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 

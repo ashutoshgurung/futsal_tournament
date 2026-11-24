@@ -13,7 +13,8 @@ import 'package:google_fonts/google_fonts.dart';
 const _kAccent = Color(0xFFB7F34A);
 
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+  final bool showBack;
+  const SignInScreen({super.key, this.showBack = false});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -212,6 +213,23 @@ class _SignInScreenState extends State<SignInScreen> {
                 ),
               ),
             ),
+
+            // NEW: back arrow, only when opened from Become Organizer.
+            // Last child of the Stack so it sits on top and can be tapped.
+            if (widget.showBack)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => context.pop(),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

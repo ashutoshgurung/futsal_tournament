@@ -48,7 +48,8 @@ class AppRouter {
         ),
         GoRoute(
           path: RouteNames.signIn,
-          pageBuilder: (_, s) => _fade(s, const SignInScreen()),
+          pageBuilder: (_, s) =>
+              _fade(s, SignInScreen(showBack: s.extra == true)),
         ),
         GoRoute(
           path: RouteNames.signUp,
