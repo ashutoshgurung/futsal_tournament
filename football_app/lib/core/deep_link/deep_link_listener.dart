@@ -152,46 +152,40 @@ class _DeepLinkListenerState extends State<DeepLinkListener>
       onError: (Object e) => debugPrint('link stream error: $e'),
     );
   }
+Future<void> _handle(Uri uri) async {
+  debugPrint('DEEPLINK received: $uri');
+  if (uri.scheme != _scheme || uri.host != 'verify-email') return;
 
-  Future<void> _handle(Uri uri) async {
-    debugPrint('DEEPLINK received: $uri');
-    if (uri.scheme != _scheme) return;
-    if (uri.host != 'verify-email' && uri.host != 'login') return;
+  final token = uri.queryParameters['token'];
+  if (token == null || token.isEmpty) return;
+  if (_verifying || token == _lastToken) return;
 
-    final token = uri.queryParameters['token'];
-    if (token == null || token.isEmpty) return;
-    if (_verifying || token == _lastToken) return;
+  _verifying = true;
+  _lastToken = token;
 
-    _verifying = true;
-    _lastToken = token;
+  try {
+    final repo = context.read<AuthRepository>();
+    await repo.verifyEmailToken(token); // POST /verify-email, stores the JWT
 
-    try {
-      final repo = context.read<AuthRepository>();
-
-      if (uri.host == 'verify-email') {
-        await repo.verifyEmailToken(token); // exchanges + stores the JWT
-      } else {
-        await repo.saveToken(token); // JWT already in the link
-      }
-
-      _snack('Email verified');
-      if (mounted) {
-        context.read<AuthBloc>().add(const AuthEvent.sessionRefreshRequested());
-      }
-    } catch (e) {
-      _lastToken = null; // allow a retry with the same link
-      _snack(e.toString().replaceFirst('Exception: ', ''));
-    } finally {
-      _verifying = false;
-    }
+    if (!mounted) return;
+    _snack('Email verified');
+    context.read<AuthBloc>().add(const AuthEvent.sessionRefreshRequested());
+  } catch (e) {
+    _snack(e.toString().replaceFirst('Exception: ', ''));
+    // Don't reset _lastToken: the token is single-use, so retrying
+    // the same link can't succeed. The user should log in instead.
+  } finally {
+    _verifying = false;
   }
+}
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && mounted) {
-      context.read<AuthBloc>().add(const AuthEvent.sessionRefreshRequested());
-    }
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  // Skip while verifying so the refresh doesn't race the token exchange
+  if (state == AppLifecycleState.resumed && mounted && !_verifying) {
+    context.read<AuthBloc>().add(const AuthEvent.sessionRefreshRequested());
   }
+}
 
   void _snack(String message) {
     scaffoldMessengerKey.currentState

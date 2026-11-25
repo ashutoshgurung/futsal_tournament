@@ -100,8 +100,6 @@ const page = (res, status, title, message, ok) =>
   </div>
 </body>
 </html>`);
-
-// ---------- helper: shared token check ----------
 const verifyToken = async (token) => {
   if (!token || typeof token !== 'string') {
     return { ok: false, status: 400, message: 'Invalid link' };
@@ -119,27 +117,35 @@ const verifyToken = async (token) => {
     return { ok: false, status: 400, message: 'Link expired. Request a new email.' };
   }
 
-  await prisma.$transaction([
+  const [user] = await prisma.$transaction([
     prisma.user.update({
       where: { id: record.userId },
       data: { emailVerified: true, emailVerifiedAt: new Date() },
+      include: { organization: true },
     }),
     prisma.emailVerificationToken.deleteMany({ where: { userId: record.userId } }),
   ]);
 
-  return { ok: true, status: 200, message: 'Email verified' };
+  return { ok: true, status: 200, message: 'Email verified', user };
 };
 
-// ---------- POST /api/auth/verify-email   body: { token } ----------
+// POST /api/auth/verify-email   body: { token }
 // Called by the Flutter app after it catches the deep link
-exports.verifyEmailJson = async (req, res, next) => {
-  try {
-    const r = await verifyToken(req.body.token);
-    res.status(r.status).json({ success: r.ok, message: r.message });
-  } catch (err) {
-    next(err);
+exports.verifyEmailJson = asyncHandler(async (req, res) => {
+  const r = await verifyToken(req.body.token);
+  if (!r.ok) {
+    return res.status(r.status).json({ success: false, message: r.message });
   }
-};
+  if (isDisabled(r.user)) throw new ApiError(403, 'Account is disabled');
+
+  res.json({
+    success: true,
+    message: r.message,
+    token: signToken(r.user),          // the login JWT
+    user: dto.user(r.user),
+    organization: orgDto(r.user.organization),
+  });
+});
 
 // ---------- POST /api/auth/resend-verification   body: { email } ----------
 exports.resendVerification = async (req, res, next) => {

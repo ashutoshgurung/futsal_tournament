@@ -43,31 +43,10 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiConstants {
-  static const int _port = 5001;
-
-  /// Best option: always pass the URL when running, so nothing is hardcoded.
-  ///
-  /// Android emulator:  --dart-define=API_BASE_URL=http://10.0.2.2:5001
-  /// Real phone (Wi-Fi): --dart-define=API_BASE_URL=http://<PC_LAN_IP>:5001
-  /// Real phone (USB):   run `adb reverse tcp:5001 tcp:5001` once, then
-  ///                     --dart-define=API_BASE_URL=http://127.0.0.1:5001
-  static const String _envBaseUrl = String.fromEnvironment('API_BASE_URL');
-
-  // IP of the computer that RUNS the backend (check with `ipconfig`).
-  // Only used as a fallback when API_BASE_URL is not passed.
-  // static const String _lanHost = 'http://10.0.2.2:5001';
-  static const String _lanHost = '192.168.1.144';
-
-  static String get baseUrl {
-    if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
-    if (kIsWeb) return 'http://localhost:$_port';
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      return 'http://localhost:$_port';
-    }
-    // Android real device. For the emulator use 10.0.2.2 via dart-define.
-    if (Platform.isAndroid) return 'http://$_lanHost:$_port';
-    return 'http://10.0.2.2:5001'; // iOS real device (simulator: use localhost)
-  }
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.0.2:5001',
+  );
 
   // Endpoints
   static String get login => '$baseUrl/api/auth/login';
