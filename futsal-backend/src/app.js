@@ -28,6 +28,7 @@ app.use('/api/teams', require('./routes/teamRoutes'));
 app.use('/api/players', require('./routes/playerRoutes'));
 app.use('/api/matches', require('./routes/matchRoutes'));
 app.use('/uploads', express.static(storage.ROOT, { maxAge: '7d', immutable: true }));
+app.use('/api/tie-sheets', require('./routes/tieSheetRoutes'));
 
 app.use(notFound);
 app.use(errorHandler);

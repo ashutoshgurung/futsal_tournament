@@ -1,4 +1,6 @@
--- ============================================================================
+
+
+SELECT pg_get_viewdef('tournament_standings'::regclass, true);-- ============================================================================
 -- Futsal Tournament SaaS - PostgreSQL schema (Neon compatible, re-runnable)
 -- Paste this whole file into: Neon Console -> SQL Editor -> Run
 -- ============================================================================
@@ -147,14 +149,18 @@ BEGIN
   END LOOP;
 END $$;
 
--- ---------- league standings view (points rules come from the tournament) ----------
-CREATE OR REPLACE VIEW tournament_standings AS
+
+-- ... Prisma's generated statements stay here ...
+
+-- ===== BOTTOM OF FILE =====
+CREATE VIEW tournament_standings AS
 WITH results AS (
+  -- If the score columns were renamed or moved, change home_score / away_score here
   SELECT home_team_id AS team_id, home_score AS gf, away_score AS ga
-    FROM matches WHERE status = 'finished' AND NOT is_bye
+    FROM matches WHERE status = 'finished' AND NOT is_bye AND home_team_id IS NOT NULL
   UNION ALL
   SELECT away_team_id, away_score, home_score
-    FROM matches WHERE status = 'finished' AND NOT is_bye
+    FROM matches WHERE status = 'finished' AND NOT is_bye AND away_team_id IS NOT NULL
 )
 SELECT s.*,
        ROW_NUMBER() OVER (
