@@ -13,3 +13,4 @@ abstract class TournamentState with _$TournamentState {
     String? error,
   }) = _TournamentState;
 }
+  

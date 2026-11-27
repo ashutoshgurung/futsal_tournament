@@ -49,7 +49,8 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
       ),
       PersistentTabConfig(
         screen: GuestGate(
-          message: 'Sign in to see your registrations',
+          title: 'My registrations',
+          message: 'Sign in to see the tournaments you have registered for.',
           child: RepositoryProvider(
             create: (context) => MyRegistrationRepository(),
             child: BlocProvider(
@@ -68,7 +69,8 @@ class _BottomNavigationScreenState extends State<BottomNavigationScreen> {
       ),
       PersistentTabConfig(
         screen: GuestGate(
-          message: 'Sign in to view your profile',
+          title: 'Your profile',
+          message: 'Sign in to manage your account and see your details.',
           child: ProfileScreen(),
         ),
         item: ItemConfig(
